@@ -5,36 +5,31 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Service;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ServiceController extends Controller
 {
-    /**
-     * Display a listing of services with search and filter.
-     */
     public function index(Request $request)
     {
-        $query = Service::query();
-
-        // Search by Service Name
-        if ($request->filled('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%');
-        }
-
-        // Filter by Status (Active / Disabled)
-        if ($request->filled('status')) {
-            $query->where('status', (bool) $request->status);
-        }
-
-        // Sort option
-        if ($request->get('sort') === 'price_asc') {
-            $query->orderBy('price', 'asc');
-        } elseif ($request->get('sort') === 'price_desc') {
-            $query->orderBy('price', 'desc');
-        } else {
-            $query->latest();
-        }
-
-        $services = $query->paginate(10)->withQueryString();
+        $services = Service::query()
+            ->when($request->filled('search'), function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%')
+                    ->orWhere('description', 'like', '%' . $request->search . '%');
+            })
+            ->when($request->filled('status'), function ($q) use ($request) {
+                $q->where('status', (bool) $request->status);
+            })
+            ->when($request->filled('sort'), function ($q) use ($request) {
+                if ($request->sort === 'price_asc') {
+                    $q->orderBy('price', 'asc');
+                } elseif ($request->sort === 'price_desc') {
+                    $q->orderBy('price', 'desc');
+                }
+            }, function ($q) {
+                $q->latest();
+            })
+            ->paginate(10)
+            ->withQueryString();
 
         return view('admin.services.index', compact('services'));
     }
@@ -47,18 +42,27 @@ class ServiceController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name'   => ['required', 'string', 'max:255', 'unique:services,name'],
-            'price'  => ['required', 'numeric', 'min:0'],
-            'status' => ['required', 'boolean'],
+            'name'        => 'required|string|max:255',
+            'price'       => 'required|numeric|min:0',
+            'description' => 'nullable|string|max:500',
+            'image'       => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
+
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('services', 'public');
+        }
 
         Service::create([
-            'name'   => $request->name,
-            'price'  => $request->price,
-            'status' => (bool) $request->status,
+            'name'        => $request->name,
+            'price'       => $request->price,
+            'description' => $request->description,
+            'image'       => $imagePath,
+            'status'      => true,
         ]);
 
-        return redirect()->route('admin.services.index')->with('success', 'Service added successfully!');
+        // Diretso itong babalik sa index view listahan pagkatapos mag-create
+        return redirect()->route('admin.services.index')->with('success', 'Matagumpay na naidagdag ang serbisyo!');
     }
 
     public function edit(Service $service)
@@ -69,18 +73,31 @@ class ServiceController extends Controller
     public function update(Request $request, Service $service)
     {
         $request->validate([
-            'name'   => ['required', 'string', 'max:255', 'unique:services,name,' . $service->id],
-            'price'  => ['required', 'numeric', 'min:0'],
-            'status' => ['required', 'boolean'],
+            'name'        => 'required|string|max:255',
+            'price'       => 'required|numeric|min:0',
+            'description' => 'nullable|string|max:500',
+            'image'       => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'status'      => 'nullable|boolean',
         ]);
 
-        $service->update([
-            'name'   => $request->name,
-            'price'  => $request->price,
-            'status' => (bool) $request->status,
-        ]);
+        $data = [
+            'name'        => $request->name,
+            'price'       => $request->price,
+            'description' => $request->description,
+            'status'      => $request->has('status') ? (bool) $request->status : $service->status,
+        ];
 
-        return redirect()->route('admin.services.index')->with('success', 'Service updated successfully!');
+        if ($request->hasFile('image')) {
+            if ($service->image && Storage::disk('public')->exists($service->image)) {
+                Storage::disk('public')->delete($service->image);
+            }
+            $data['image'] = $request->file('image')->store('services', 'public');
+        }
+
+        $service->update($data);
+
+        // Diretso itong babalik sa index view listahan pagkatapos mag-edit/update
+        return redirect()->route('admin.services.index')->with('success', 'Matagumpay na na-update ang serbisyo!');
     }
 
     public function toggleStatus(Service $service)
@@ -89,8 +106,17 @@ class ServiceController extends Controller
             'status' => !$service->status,
         ]);
 
-        $statusText = $service->status ? 'activated' : 'deactivated';
+        return redirect()->route('admin.services.index')->with('success', 'Na-update ang estado ng serbisyo!');
+    }
 
-        return redirect()->back()->with('success', "Service successfully {$statusText}!");
+    public function destroy(Service $service)
+    {
+        if ($service->image && Storage::disk('public')->exists($service->image)) {
+            Storage::disk('public')->delete($service->image);
+        }
+
+        $service->delete();
+
+        return redirect()->route('admin.services.index')->with('success', 'Matagumpay na naalis ang serbisyo!');
     }
 }

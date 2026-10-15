@@ -100,8 +100,9 @@
                     <thead>
                         <tr>
                             <th class="ps-4">#</th>
+                            <th>Photo</th>
                             <th>Staff Member</th>
-                            <th>Email Address</th>
+                            <th>Title / Designation</th>
                             <th class="text-center">Status</th>
                             <th>Joined Date</th>
                             <th class="text-end pe-4">Actions</th>
@@ -112,10 +113,27 @@
                         <tr>
                             <td class="ps-4 text-muted fw-semibold">{{ $loop->iteration + ($employees->currentPage() - 1) * $employees->perPage() }}</td>
                             <td>
-                                <div class="fw-bold text-light fs-6">{{ $employee->name }}</div>
+                                @if($employee->photo)
+                                    <img src="{{ asset('storage/' . $employee->photo) }}" alt="{{ $employee->name }}" class="rounded-circle border border-secondary border-opacity-25 object-fit-cover" style="width: 44px; height: 44px;">
+                                @else
+                                    <div class="rounded-circle border border-secondary border-opacity-25 d-flex align-items-center justify-content-center bg-dark text-warning" style="width: 44px; height: 44px;">
+                                        <i class="bi bi-person-fill fs-5"></i>
+                                    </div>
+                                @endif
                             </td>
                             <td>
-                                <span class="text-muted">{{ $employee->email }}</span>
+                                <div class="fw-bold text-light fs-6">{{ $employee->name }}</div>
+                                <div class="text-muted small font-monospace">{{ $employee->email }}</div>
+                                @if($employee->bio)
+                                    <small class="text-secondary text-truncate d-block mt-1" style="max-width: 200px;">
+                                        {{ $employee->bio }}
+                                    </small>
+                                @endif
+                            </td>
+                            <td>
+                                <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2 py-1">
+                                    {{ $employee->title ?? 'Executive Stylist' }}
+                                </span>
                             </td>
                             <td class="text-center">
                                 @if($employee->status)
@@ -136,7 +154,7 @@
                                         </button>
                                     </form>
 
-                                    <!-- Edit Button -->
+                                    <!-- Edit Button (Directs to edit page) -->
                                     <a href="{{ route('admin.employees.edit', $employee->id) }}" class="btn btn-sm btn-outline-primary action-btn" title="Edit Staff Details">
                                         <i class="bi bi-pencil-fill"></i>
                                     </a>
@@ -145,7 +163,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="6" class="text-center py-5 text-muted">
+                            <td colspan="7" class="text-center py-5 text-muted">
                                 <i class="bi bi-people fs-1 d-block mb-2 text-secondary"></i>
                                 @if(request('search'))
                                     No staff member matching "<strong>{{ request('search') }}</strong>".

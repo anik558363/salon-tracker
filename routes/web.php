@@ -14,12 +14,19 @@ use App\Http\Controllers\Employee\ProfileSettingsController as EmployeeProfileSe
 
 
 use App\Models\Service;
+use App\Models\User;
+
 
 Route::get('/', function () {
-   
     $services = Service::where('status', true)->get();
 
-    return view('welcome', compact('services'));
+    // Active staff/stylists data
+    $stylists = User::role('employee')
+        ->where('status', true)
+        ->latest()
+        ->get();
+
+    return view('welcome', compact('services', 'stylists'));
 })->name('welcome');
 
 

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,7 +9,9 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=fallback" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=fallback"
+        rel="stylesheet">
 
     <!-- Bootstrap 5 & Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
@@ -200,16 +203,19 @@
         }
     </style>
 </head>
+
 <body>
 
     <!-- Navigation Header -->
     <nav class="navbar navbar-expand-lg luxury-nav sticky-top">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center text-white fw-bold fs-4" href="{{ url('/') }}">
-                <span class="me-2 fs-3">💈</span> <span class="gold-text">LUXE SALON</span>&nbsp;<span class="text-white fw-light fs-6">DUBAI</span>
+                <span class="me-2 fs-3">💈</span> <span class="gold-text">LUXE SALON</span>&nbsp;<span
+                    class="text-white fw-light fs-6">DUBAI</span>
             </a>
 
-            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navContent">
                 <i class="bi bi-list text-white fs-2"></i>
             </button>
 
@@ -222,11 +228,14 @@
                         <a class="nav-link text-white-50 px-3" href="#about">Why Choose Us</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link text-white-50 px-3" href="#team">Our Team</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link text-white-50 px-3" href="#contact">Location & Hours</a>
                     </li>
                     <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
                         @auth
-                            @if(auth()->user()->hasRole('super-admin'))
+                            @if (auth()->user()->hasRole('super-admin'))
                                 <a href="{{ route('admin.dashboard') }}" class="btn btn-gold btn-sm px-4">
                                     <i class="bi bi-speedometer2 me-1"></i> Admin Portal
                                 </a>
@@ -258,7 +267,8 @@
                         Redefining Elegance, Luxury & Precision Grooming
                     </h1>
                     <p class="hero-subtitle mb-5 px-lg-5">
-                        Experience bespoke hair treatments, executive styling, and rejuvenation in the heart of the United Arab Emirates. Dedicated to perfection and timeless sophistication.
+                        Experience bespoke hair treatments, executive styling, and rejuvenation in the heart of the
+                        United Arab Emirates. Dedicated to perfection and timeless sophistication.
                     </p>
                     <div class="d-flex flex-wrap justify-content-center gap-3">
                         <a href="#services" class="btn btn-gold px-4 py-3 fs-6">
@@ -281,55 +291,305 @@
                     <div class="feature-box">
                         <div class="feature-icon"><i class="bi bi-award"></i></div>
                         <h4 class="text-white fw-bold mb-3">Master Stylists</h4>
-                        <p class="card-description mb-0">World-class barbers and aestheticians trained to deliver elite grooming tailored to your distinct persona.</p>
+                        <p class="card-description mb-0">World-class barbers and aestheticians trained to deliver elite
+                            grooming tailored to your distinct persona.</p>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="feature-box">
                         <div class="feature-icon"><i class="bi bi-shield-check"></i></div>
                         <h4 class="text-white fw-bold mb-3">Private VIP Suites</h4>
-                        <p class="card-description mb-0">Immerse yourself in complete privacy and tranquility while enjoying premium beverages and tailored care.</p>
+                        <p class="card-description mb-0">Immerse yourself in complete privacy and tranquility while
+                            enjoying premium beverages and tailored care.</p>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="feature-box">
                         <div class="feature-icon"><i class="bi bi-droplet-half"></i></div>
                         <h4 class="text-white fw-bold mb-3">Organic Luxury Products</h4>
-                        <p class="card-description mb-0">We use only top-tier imported, dermatologically tested, organic hair and skincare formulations.</p>
+                        <p class="card-description mb-0">We use only top-tier imported, dermatologically tested, organic
+                            hair and skincare formulations.</p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Services & Pricing List -->
+
+  <!-- Our Team / Master Stylists Section -->
+<section id="team" class="py-5" style="background: rgba(0, 0, 0, 0.25);">
+    <div class="container py-4">
+        <!-- Pamagat ng Seksyon -->
+        <div class="text-center mb-5">
+            <span class="text-uppercase gold-text fw-bold small tracking-wider">Meet the Artisans</span>
+            <h2 class="display-6 fw-bold text-white mt-1">Our Master Stylists</h2>
+            <p class="card-description">Elite grooming specialists dedicated to tailoring your signature look</p>
+        </div>
+
+        <style>
+            .team-card {
+                background: #181b20;
+                border: 1px solid rgba(255, 255, 255, 0.07);
+                border-radius: 16px;
+                padding: 30px 24px;
+                text-align: center;
+                transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .team-card:hover {
+                transform: translateY(-5px);
+                border-color: rgba(212, 175, 55, 0.4);
+                box-shadow: 0 14px 35px rgba(0, 0, 0, 0.5);
+            }
+
+            .stylist-avatar-wrapper {
+                width: 90px;
+                height: 90px;
+                border-radius: 50%;
+                overflow: hidden;
+                margin-bottom: 18px;
+                border: 2px solid rgba(212, 175, 55, 0.4);
+                background: rgba(212, 175, 55, 0.1);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: transform 0.3s ease, border-color 0.3s ease;
+            }
+
+            .stylist-avatar-wrapper img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+            .team-card:hover .stylist-avatar-wrapper {
+                transform: scale(1.08);
+                border-color: #d4af37;
+            }
+
+            .stylist-name {
+                font-size: 1.2rem;
+                font-weight: 700;
+                color: #ffffff;
+                margin-bottom: 4px;
+            }
+
+            .stylist-title {
+                color: #f7d070;
+                font-size: 0.82rem;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+                font-weight: 600;
+                margin-bottom: 12px;
+            }
+
+            .stylist-bio {
+                color: #9ca3af;
+                font-size: 0.86rem;
+                line-height: 1.6;
+                margin-bottom: 18px;
+                flex-grow: 1;
+            }
+
+            .stylist-badge {
+                background: rgba(16, 185, 129, 0.12);
+                color: #34d399;
+                border: 1px solid rgba(52, 211, 153, 0.25);
+                font-size: 0.75rem;
+                padding: 5px 14px;
+                border-radius: 20px;
+                font-weight: 600;
+            }
+        </style>
+
+        <!-- Talaan ng mga Stylist -->
+        <div class="row g-4 justify-content-center">
+            @forelse($stylists as $stylist)
+                <div class="col-12 col-sm-6 col-lg-3">
+                    <div class="team-card">
+                        <!-- Dynamic na Larawan o Fallback Icon -->
+                        <div class="stylist-avatar-wrapper">
+                            @if($stylist->photo)
+                                <img src="{{ asset('storage/' . $stylist->photo) }}" alt="{{ $stylist->name }}">
+                            @else
+                                <i class="bi bi-person-fill fs-1 text-warning"></i>
+                            @endif
+                        </div>
+
+                        <!-- Dynamic na Pangalan at Titulo -->
+                        <h4 class="stylist-name">{{ $stylist->name }}</h4>
+                        <span class="stylist-title">{{ $stylist->title ?? 'Executive Stylist' }}</span>
+
+                     <!-- Dynamic na Maikling Paglalarawan o Bio -->
+<p class="stylist-bio">
+    {{ \Illuminate\Support\Str::limit($stylist->bio ?? 'Specialist in precision cutting, beard sculpting, and executive hair treatments.', 80, '...') }}
+</p>
+
+                        <!-- Sertipikasyon o Status Badge -->
+                        <div class="mt-auto">
+                            <span class="stylist-badge">
+                                <i class="bi bi-patch-check-fill me-1"></i> Certified Expert
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="col-12 text-center py-5 text-muted">
+                    <i class="bi bi-people fs-1 d-block mb-2 text-secondary"></i>
+                    <p>Our master grooming specialists will be announced shortly.</p>
+                </div>
+            @endforelse
+        </div>
+    </div>
+</section>
+
+    <!-- Services & Pricing Grid Section -->
     <section id="services" class="py-5" style="background: rgba(255, 255, 255, 0.015);">
         <div class="container py-4">
+            <!-- Section Header -->
             <div class="text-center mb-5">
                 <span class="text-uppercase gold-text fw-bold small tracking-wider">Our Menu</span>
-                <h2 class="display-6  fw-bold text-white mt-1">Signature Services & Rates</h2>
+                <h2 class="display-6 fw-bold text-white mt-1">Signature Services & Rates</h2>
                 <p class="card-description">Transparent pricing curated for executive grooming</p>
             </div>
 
-            <div class="row justify-content-center">
-                <div class="col-lg-8">
-                    @forelse($services as $service)
-                        <div class="rate-card-item">
-                            <div>
-                                <h5 class="text-white mb-1 fw-bold">{{ $service->name }}</h5>
-                                <div class="service-subtext">Professional salon service with premium finish</div>
+            <!-- Custom Card Styles -->
+            <style>
+                .service-premium-card {
+                    background: #181b20;
+                    border: 1px solid rgba(255, 255, 255, 0.07);
+                    border-radius: 16px;
+                    overflow: hidden;
+                    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+                    display: flex;
+                    flex-direction: column;
+                    height: 100%;
+                }
+
+                .service-premium-card:hover {
+                    transform: translateY(-5px);
+                    border-color: rgba(212, 175, 55, 0.4);
+                    box-shadow: 0 14px 35px rgba(0, 0, 0, 0.5);
+                }
+
+                .service-img-wrapper {
+                    position: relative;
+                    width: 100%;
+                    height: 220px;
+                    overflow: hidden;
+                    background: #111317;
+                }
+
+                .service-img-wrapper img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    transition: transform 0.4s ease;
+                }
+
+                .service-premium-card:hover .service-img-wrapper img {
+                    transform: scale(1.06);
+                }
+
+                .service-price-floating {
+                    position: absolute;
+                    bottom: 12px;
+                    right: 12px;
+                    background: rgba(15, 17, 21, 0.85);
+                    backdrop-filter: blur(8px);
+                    color: #34d399;
+                    font-weight: 700;
+                    font-size: 0.95rem;
+                    padding: 6px 14px;
+                    border-radius: 30px;
+                    border: 1px solid rgba(52, 211, 153, 0.3);
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                }
+
+                .service-card-body {
+                    padding: 22px;
+                    display: flex;
+                    flex-direction: column;
+                    flex-grow: 1;
+                }
+
+                .service-card-title {
+                    color: #ffffff;
+                    font-size: 1.2rem;
+                    font-weight: 700;
+                    margin-bottom: 8px;
+                }
+
+                .service-card-desc {
+                    color: #9ca3af;
+                    font-size: 0.88rem;
+                    line-height: 1.6;
+                    margin-bottom: 18px;
+                    flex-grow: 1;
+                }
+
+                .service-card-footer {
+                    padding-top: 14px;
+                    border-top: 1px solid rgba(255, 255, 255, 0.05);
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                }
+            </style>
+
+            <!-- Services Grid -->
+            <div class="row g-4">
+                @forelse($services as $service)
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="service-premium-card">
+                            <!-- Image Container -->
+                            <div class="service-img-wrapper">
+                                @if ($service->image)
+                                    <img src="{{ asset('storage/' . $service->image) }}" alt="{{ $service->name }}">
+                                @else
+                                    <div
+                                        class="w-100 h-100 d-flex flex-column align-items-center justify-content-center text-secondary">
+                                        <i class="bi bi-scissors fs-1 text-warning opacity-75 mb-1"></i>
+                                        <small class="text-uppercase tracking-wider"
+                                            style="font-size: 0.7rem;">Exclusive Service</small>
+                                    </div>
+                                @endif
+
+                                <!-- Floating Price Tag -->
+                                <span class="service-price-floating">
+                                    AED {{ number_format($service->price, 2) }}
+                                </span>
                             </div>
-                            <div>
-                                <span class="price-tag">AED {{ number_format($service->price, 2) }}</span>
+
+                            <!-- Card Content -->
+                            <div class="service-card-body">
+                                <h4 class="service-card-title">{{ $service->name }}</h4>
+                                <p class="service-card-desc">
+                                    {{ $service->description ?? 'Bespoke salon treatment delivering sharp styling, executive grooming, and premium care.' }}
+                                </p>
+
+                                <div class="service-card-footer">
+                                    <span
+                                        class="badge bg-secondary bg-opacity-25 text-light border border-secondary border-opacity-25 rounded-pill px-3 py-1 small">
+                                        <i class="bi bi-stars text-warning me-1"></i> Salon Exclusive
+                                    </span>
+                                    <a href="#contact" class="text-decoration-none small text-warning fw-semibold">
+                                        Inquire <i class="bi bi-arrow-right ms-1"></i>
+                                    </a>
+                                </div>
                             </div>
                         </div>
-                    @empty
-                        <div class="text-center py-5 text-muted">
-                            <i class="bi bi-scissors fs-1 d-block mb-3 text-secondary"></i>
-                            <p>Our updated catalog will be available shortly.</p>
-                        </div>
-                    @endforelse
-                </div>
+                    </div>
+                @empty
+                    <div class="col-12 text-center py-5 text-muted">
+                        <i class="bi bi-scissors fs-1 d-block mb-3 text-secondary"></i>
+                        <p class="fs-5">Our updated catalog will be available shortly.</p>
+                    </div>
+                @endforelse
             </div>
         </div>
     </section>
@@ -340,13 +600,16 @@
             <div class="row g-4 justify-content-center">
                 <div class="col-lg-5">
                     <div class="feature-box">
-                        <h4 class="font-serif fw-bold text-white mb-3"><i class="bi bi-clock-history gold-text me-2"></i>Operating Hours</h4>
+                        <h4 class="font-serif fw-bold text-white mb-3"><i
+                                class="bi bi-clock-history gold-text me-2"></i>Operating Hours</h4>
                         <ul class="list-unstyled mb-0">
-                            <li class="d-flex justify-content-between py-2 border-bottom border-secondary border-opacity-10">
+                            <li
+                                class="d-flex justify-content-between py-2 border-bottom border-secondary border-opacity-10">
                                 <span class="timing-label">Saturday – Thursday:</span>
                                 <span class="text-white fw-semibold">10:00 AM – 10:00 PM</span>
                             </li>
-                            <li class="d-flex justify-content-between py-2 border-bottom border-secondary border-opacity-10">
+                            <li
+                                class="d-flex justify-content-between py-2 border-bottom border-secondary border-opacity-10">
                                 <span class="timing-label">Friday:</span>
                                 <span class="text-white fw-semibold">01:30 PM – 11:00 PM</span>
                             </li>
@@ -360,9 +623,11 @@
 
                 <div class="col-lg-5">
                     <div class="feature-box">
-                        <h4 class="font-serif fw-bold text-white mb-3"><i class="bi bi-geo-alt-fill gold-text me-2"></i>Salon Location</h4>
+                        <h4 class="font-serif fw-bold text-white mb-3"><i
+                                class="bi bi-geo-alt-fill gold-text me-2"></i>Salon Location</h4>
                         <p class="location-details mb-2">Downtown Boulevard, Dubai, United Arab Emirates</p>
-                        <p class="location-details mb-3"><i class="bi bi-telephone gold-text me-2"></i>+971 4 000 0000</p>
+                        <p class="location-details mb-3"><i class="bi bi-telephone gold-text me-2"></i>+971 4 000 0000
+                        </p>
                         <a href="https://maps.google.com" target="_blank" class="btn btn-outline-gold btn-sm">
                             <i class="bi bi-map me-1"></i> Open in Google Maps
                         </a>
@@ -387,4 +652,5 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

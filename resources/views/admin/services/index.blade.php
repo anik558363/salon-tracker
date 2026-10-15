@@ -139,7 +139,7 @@
                     <div class="row g-3 align-items-center">
                         <div class="col-lg-4 col-md-6">
                             <div class="input-group">
-                                <input type="text" name="search" class="form-control filter-input border-start-0" placeholder="Search service name..." value="{{ request('search') }}">
+                                <input type="text" name="search" class="form-control filter-input border-start-0" placeholder="Search service or description..." value="{{ request('search') }}">
                             </div>
                         </div>
 
@@ -190,6 +190,7 @@
                     <thead>
                         <tr>
                             <th class="ps-4">#</th>
+                            <th>Image</th>
                             <th>Service Details</th>
                             <th class="text-center">Rate</th>
                             <th class="text-center">Status</th>
@@ -202,8 +203,19 @@
                         <tr>
                             <td class="ps-4 text-muted fw-semibold">{{ $loop->iteration + ($services->currentPage() - 1) * $services->perPage() }}</td>
                             <td>
+                                @if($service->image)
+                                    <img src="{{ asset('storage/' . $service->image) }}" alt="{{ $service->name }}" class="rounded-3 border border-secondary border-opacity-25 object-fit-cover" style="width: 46px; height: 46px;">
+                                @else
+                                    <div class="rounded-3 border border-secondary border-opacity-25 d-flex align-items-center justify-content-center bg-dark text-warning" style="width: 46px; height: 46px;">
+                                        <i class="bi bi-scissors fs-5"></i>
+                                    </div>
+                                @endif
+                            </td>
+                            <td>
                                 <div class="fw-bold text-light fs-6 mb-1">{{ $service->name }}</div>
-                                <span class="badge bg-secondary bg-opacity-25 text-secondary border border-secondary border-opacity-25" style="font-size: 0.7rem;">ID: #{{ $service->id }}</span>
+                                <div class="text-muted small" style="max-width: 280px; white-space: normal; line-height: 1.4;">
+                                    {{ $service->description ?? 'No description provided.' }}
+                                </div>
                             </td>
                             <td class="text-center">
                                 <span class="badge-price">AED {{ number_format($service->price, 2) }}</span>
@@ -227,7 +239,7 @@
                                         </button>
                                     </form>
 
-                                    <!-- Edit Button -->
+                                    <!-- Edit Button (Directs to edit page) -->
                                     <a href="{{ route('admin.services.edit', $service->id) }}" class="btn btn-sm btn-outline-primary action-btn" title="Edit Service">
                                         <i class="bi bi-pencil-fill"></i>
                                     </a>
@@ -236,7 +248,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="6" class="text-center py-5 text-muted">
+                            <td colspan="7" class="text-center py-5 text-muted">
                                 <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
                                 @if(request('search'))
                                     No services matching "<strong>{{ request('search') }}</strong>".
@@ -259,3 +271,5 @@
     </div>
 </div>
 @endsection
+
+

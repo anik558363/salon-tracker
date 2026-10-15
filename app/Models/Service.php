@@ -2,11 +2,20 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Service extends Model
 {
-    protected $fillable = ['name', 'price', 'status'];
+    use HasFactory;
+
+    protected $fillable = [
+        'name',
+        'price',
+        'description',
+        'image',
+        'status',
+    ];
 
     public function entryItems()
     {

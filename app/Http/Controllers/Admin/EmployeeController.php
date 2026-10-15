@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
-use Spatie\Permission\Models\Role;
 
 class EmployeeController extends Controller
 {
@@ -45,23 +45,32 @@ class EmployeeController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name'     => ['required', 'string', 'max:255'],
-            'email'    => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:6'],
-            'status'   => ['required', 'boolean'],
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:6',
+            'title'    => 'nullable|string|max:100',
+            'bio'      => 'nullable|string|max:500',
+            'photo'    => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
-        $employeeRole = Role::firstOrCreate(['name' => 'employee']);
+        $photoPath = null;
+        if ($request->hasFile('photo')) {
+            $photoPath = $request->file('photo')->store('stylists', 'public');
+        }
 
         $employee = User::create([
             'name'     => $request->name,
             'email'    => $request->email,
             'password' => Hash::make($request->password),
-            'status'   => (bool) $request->status,
+            'title'    => $request->title ?? 'Executive Stylist',
+            'bio'      => $request->bio,
+            'photo'    => $photoPath,
+            'status'   => true,
         ]);
 
-        $employee->assignRole($employeeRole);
+        $employee->assignRole('employee');
 
+        // ক্রিয়েট করার পর সরাসরি স্টাফ লিস্ট পেজে পাঠাবে
         return redirect()->route('admin.employees.index')->with('success', 'Staff member added successfully!');
     }
 
@@ -73,24 +82,37 @@ class EmployeeController extends Controller
     public function update(Request $request, User $employee)
     {
         $request->validate([
-            'name'     => ['required', 'string', 'max:255'],
-            'email'    => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($employee->id)],
-            'password' => ['nullable', 'string', 'min:6'],
-            'status'   => ['required', 'boolean'],
+            'name'     => 'required|string|max:255',
+            'email'    => ['required', 'email', Rule::unique('users')->ignore($employee->id)],
+            'password' => 'nullable|string|min:6',
+            'title'    => 'nullable|string|max:100',
+            'bio'      => 'nullable|string|max:500',
+            'photo'    => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'status'   => 'nullable|boolean',
         ]);
 
         $data = [
             'name'   => $request->name,
             'email'  => $request->email,
-            'status' => (bool) $request->status,
+            'title'  => $request->title ?? 'Executive Stylist',
+            'bio'    => $request->bio,
+            'status' => $request->has('status') ? (bool) $request->status : $employee->status,
         ];
 
         if ($request->filled('password')) {
             $data['password'] = Hash::make($request->password);
         }
 
+        if ($request->hasFile('photo')) {
+            if ($employee->photo && Storage::disk('public')->exists($employee->photo)) {
+                Storage::disk('public')->delete($employee->photo);
+            }
+            $data['photo'] = $request->file('photo')->store('stylists', 'public');
+        }
+
         $employee->update($data);
 
+        // এডিট/আপডেট করার পর সরাসরি স্টাফ লিস্ট পেজে পাঠাবে
         return redirect()->route('admin.employees.index')->with('success', 'Staff details updated successfully!');
     }
 
