@@ -22,14 +22,22 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-    public function store(LoginRequest $request): RedirectResponse
-    {
-        $request->authenticate();
+ public function store(LoginRequest $request): RedirectResponse
+{
+    $request->authenticate();
 
-        $request->session()->regenerate();
+    $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+    $user = auth()->user();
+
+    // সুপার এডমিন যাবে এডমিন ড্যাশবোর্ডে
+    if ($user->hasRole('super-admin')) {
+        return redirect()->intended(route('admin.dashboard'));
     }
+
+    // এমপ্লয়ি সরাসরি সার্ভিস এন্ট্রি পেজে যাবে
+    return redirect()->intended(route('employee.entries.create'));
+}
 
     /**
      * Destroy an authenticated session.

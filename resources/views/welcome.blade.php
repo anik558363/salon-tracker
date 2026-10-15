@@ -316,136 +316,149 @@
     </section>
 
 
-  <!-- Our Team / Master Stylists Section -->
-<section id="team" class="py-5" style="background: rgba(0, 0, 0, 0.25);">
-    <div class="container py-4">
-        <!-- Pamagat ng Seksyon -->
-        <div class="text-center mb-5">
-            <span class="text-uppercase gold-text fw-bold small tracking-wider">Meet the Artisans</span>
-            <h2 class="display-6 fw-bold text-white mt-1">Our Master Stylists</h2>
-            <p class="card-description">Elite grooming specialists dedicated to tailoring your signature look</p>
-        </div>
+    <!-- Our Team / Master Stylists Section -->
+    <section id="team" class="py-5" style="background: rgba(0, 0, 0, 0.25);">
+        <div class="container py-4">
+            <!-- Pamagat ng Seksyon -->
+            <div class="text-center mb-5">
+                <span class="text-uppercase gold-text fw-bold small tracking-wider">Meet the Artisans</span>
+                <h2 class="display-6 fw-bold text-white mt-1">Our Master Stylists</h2>
+                <p class="card-description">Elite grooming specialists dedicated to tailoring your signature look</p>
+            </div>
 
-        <style>
-            .team-card {
-                background: #181b20;
-                border: 1px solid rgba(255, 255, 255, 0.07);
-                border-radius: 16px;
-                padding: 30px 24px;
-                text-align: center;
-                transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-                height: 100%;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-            }
+            <style>
+                .team-card {
+                    background: #181b20;
+                    border: 1px solid rgba(255, 255, 255, 0.07);
+                    border-radius: 16px;
+                    padding: 30px 24px;
+                    text-align: center;
+                    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+                    height: 100%;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                }
 
-            .team-card:hover {
-                transform: translateY(-5px);
-                border-color: rgba(212, 175, 55, 0.4);
-                box-shadow: 0 14px 35px rgba(0, 0, 0, 0.5);
-            }
+                .team-card:hover {
+                    transform: translateY(-5px);
+                    border-color: rgba(212, 175, 55, 0.4);
+                    box-shadow: 0 14px 35px rgba(0, 0, 0, 0.5);
+                }
 
-            .stylist-avatar-wrapper {
-                width: 90px;
-                height: 90px;
-                border-radius: 50%;
-                overflow: hidden;
-                margin-bottom: 18px;
-                border: 2px solid rgba(212, 175, 55, 0.4);
-                background: rgba(212, 175, 55, 0.1);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                transition: transform 0.3s ease, border-color 0.3s ease;
-            }
+                .stylist-avatar-wrapper {
+                    width: 90px;
+                    height: 90px;
+                    border-radius: 50%;
+                    overflow: hidden;
+                    margin-bottom: 18px;
+                    border: 2px solid rgba(212, 175, 55, 0.4);
+                    background: rgba(212, 175, 55, 0.1);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: transform 0.3s ease, border-color 0.3s ease;
+                }
 
-            .stylist-avatar-wrapper img {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-            }
+                .stylist-avatar-wrapper img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                }
 
-            .team-card:hover .stylist-avatar-wrapper {
-                transform: scale(1.08);
-                border-color: #d4af37;
-            }
+                .team-card:hover .stylist-avatar-wrapper {
+                    transform: scale(1.08);
+                    border-color: #d4af37;
+                }
 
-            .stylist-name {
-                font-size: 1.2rem;
-                font-weight: 700;
-                color: #ffffff;
-                margin-bottom: 4px;
-            }
+                .stylist-name {
+                    font-size: 1.2rem;
+                    font-weight: 700;
+                    color: #ffffff;
+                    margin-bottom: 4px;
+                }
 
-            .stylist-title {
-                color: #f7d070;
-                font-size: 0.82rem;
-                letter-spacing: 0.05em;
-                text-transform: uppercase;
-                font-weight: 600;
-                margin-bottom: 12px;
-            }
+                .stylist-title {
+                    color: #f7d070;
+                    font-size: 0.82rem;
+                    letter-spacing: 0.05em;
+                    text-transform: uppercase;
+                    font-weight: 600;
+                    margin-bottom: 12px;
+                }
 
-            .stylist-bio {
-                color: #9ca3af;
-                font-size: 0.86rem;
-                line-height: 1.6;
-                margin-bottom: 18px;
-                flex-grow: 1;
-            }
+                .stylist-bio {
+                    color: #9ca3af;
+                    font-size: 0.86rem;
+                    line-height: 1.6;
+                    margin-bottom: 18px;
+                    flex-grow: 1;
+                }
 
-            .stylist-badge {
-                background: rgba(16, 185, 129, 0.12);
-                color: #34d399;
-                border: 1px solid rgba(52, 211, 153, 0.25);
-                font-size: 0.75rem;
-                padding: 5px 14px;
-                border-radius: 20px;
-                font-weight: 600;
-            }
-        </style>
+                .stylist-badge {
+                    background: rgba(16, 185, 129, 0.12);
+                    color: #34d399;
+                    border: 1px solid rgba(52, 211, 153, 0.25);
+                    font-size: 0.75rem;
+                    padding: 5px 14px;
+                    border-radius: 20px;
+                    font-weight: 600;
+                }
+            </style>
 
-        <!-- Talaan ng mga Stylist -->
-        <div class="row g-4 justify-content-center">
-            @forelse($stylists as $stylist)
-                <div class="col-12 col-sm-6 col-lg-3">
-                    <div class="team-card">
-                        <!-- Dynamic na Larawan o Fallback Icon -->
-                        <div class="stylist-avatar-wrapper">
-                            @if($stylist->photo)
-                                <img src="{{ asset('storage/' . $stylist->photo) }}" alt="{{ $stylist->name }}">
-                            @else
-                                <i class="bi bi-person-fill fs-1 text-warning"></i>
-                            @endif
-                        </div>
+          <!-- Talaan ng mga Stylist -->
+<div class="row g-4 justify-content-center">
+    @forelse($stylists as $stylist)
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="team-card position-relative">
+                <!-- Stylist Avatar -->
+                <div class="stylist-avatar-wrapper">
+                    @if($stylist->photo)
+                        <img src="{{ asset('storage/' . $stylist->photo) }}" alt="{{ $stylist->name }}">
+                    @else
+                        <i class="bi bi-person-fill fs-1 text-warning"></i>
+                    @endif
+                </div>
 
-                        <!-- Dynamic na Pangalan at Titulo -->
-                        <h4 class="stylist-name">{{ $stylist->name }}</h4>
-                        <span class="stylist-title">{{ $stylist->title ?? 'Executive Stylist' }}</span>
+                <!-- Stylist Info -->
+                <h4 class="stylist-name">{{ $stylist->name }}</h4>
+                <span class="stylist-title">{{ $stylist->title ?? 'Executive Stylist' }}</span>
 
-                     <!-- Dynamic na Maikling Paglalarawan o Bio -->
-<p class="stylist-bio">
-    {{ \Illuminate\Support\Str::limit($stylist->bio ?? 'Specialist in precision cutting, beard sculpting, and executive hair treatments.', 80, '...') }}
-</p>
+                <p class="stylist-bio">
+                    {{ str($stylist->bio ?? 'Specialist in precision cutting, beard sculpting, and executive hair treatments.')->limit(30) }}
+                </p>
 
-                        <!-- Sertipikasyon o Status Badge -->
-                        <div class="mt-auto">
-                            <span class="stylist-badge">
+                <!-- Action Button for Staff Access -->
+                <div class="mt-auto w-100 pt-2">
+                    @auth
+                        @if(auth()->id() === $stylist->id)
+                            <a href="{{ route('employee.entries.create') }}" class="btn btn-gold btn-sm w-100 rounded-pill py-2">
+                                <i class="bi bi-scissors me-1"></i> New Service Entry
+                            </a>
+                        @else
+                            <span class="stylist-badge d-inline-block">
                                 <i class="bi bi-patch-check-fill me-1"></i> Certified Expert
                             </span>
-                        </div>
-                    </div>
+                        @endif
+                    @else
+                        <a href="{{ route('login', ['email' => $stylist->email]) }}" class="btn btn-outline-gold btn-sm w-100 rounded-pill py-2 text-decoration-none">
+                            <i class="bi bi-box-arrow-in-right me-1"></i> Stylist Access
+                        </a>
+                    @endauth
                 </div>
-            @empty
-                <div class="col-12 text-center py-5 text-muted">
-                    <i class="bi bi-people fs-1 d-block mb-2 text-secondary"></i>
-                    <p>Our master grooming specialists will be announced shortly.</p>
-                </div>
-            @endforelse
+            </div>
         </div>
-    </div>
-</section>
+    @empty
+        <div class="col-12 text-center py-5 text-muted">
+            <i class="bi bi-people fs-1 d-block mb-2 text-secondary"></i>
+            <p>Our master grooming specialists will be announced shortly.</p>
+        </div>
+    @endforelse
+</div>
+
+
+        </div>
+    </section>
 
     <!-- Services & Pricing Grid Section -->
     <section id="services" class="py-5" style="background: rgba(255, 255, 255, 0.015);">

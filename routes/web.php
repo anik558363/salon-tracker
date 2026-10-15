@@ -31,13 +31,16 @@ Route::get('/', function () {
 
 
 
-// রোল অনুযায়ী ড্যাশবোর্ড রিডাইরেক্ট রাউট
+// রোল অনুযায়ী রিডাইরেক্ট রাউট
 Route::get('/dashboard', function () {
     if (auth()->user()->hasRole('super-admin')) {
         return redirect()->route('admin.dashboard');
     }
-    return redirect()->route('employee.dashboard');
+    // এমপ্লয়ি সরাসরি সার্ভিস এন্ট্রি পেজে যাবে
+    return redirect()->route('employee.entries.create');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+
 
 Route::middleware(['auth'])->group(function () {
 
