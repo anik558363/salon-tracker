@@ -1,0 +1,168 @@
+/* ==========================================================
+   PREMIUM LUXURY SALON THEME (DUBAI EDITION)
+   ========================================================== */
+
+:root {
+    --bg-dark-body: #121417;
+    --bg-dark-card: #1c2025;
+    --bg-dark-card-hover: #22272e;
+    --bg-dark-header: #171a1e;
+    --border-color: rgba(255, 255, 255, 0.08);
+    --border-subtle: rgba(255, 255, 255, 0.04);
+    --text-primary: #f3f4f6;
+    --text-secondary: #9ca3af;
+    --accent-emerald: #10b981;
+    --accent-blue: #3b82f6;
+    --accent-amber: #f59e0b;
+    --accent-purple: #a855f7;
+}
+
+body.layout-fixed {
+    background-color: var(--bg-dark-body) !important;
+    color: var(--text-primary);
+    font-family: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Card Styling */
+.card, .panel-card, .premium-card {
+    background: var(--bg-dark-card) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 14px !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25) !important;
+    color: var(--text-primary) !important;
+}
+
+.card-header, .panel-header, .premium-header {
+    background: var(--bg-dark-header) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    padding: 16px 22px !important;
+    border-top-left-radius: 14px !important;
+    border-top-right-radius: 14px !important;
+}
+
+.card-footer {
+    background: var(--bg-dark-header) !important;
+    border-top: 1px solid var(--border-color) !important;
+    border-bottom-left-radius: 14px !important;
+    border-bottom-right-radius: 14px !important;
+}
+
+/* Table Design */
+.table, .panel-table, .premium-table {
+    color: var(--text-primary) !important;
+    margin-bottom: 0 !important;
+}
+
+.table thead th, .panel-table thead th, .premium-table thead th {
+    background: #15181c !important;
+    color: var(--text-secondary) !important;
+    text-transform: uppercase !important;
+    font-size: 0.72rem !important;
+    letter-spacing: 0.06em !important;
+    padding: 15px 18px !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    font-weight: 600 !important;
+}
+
+.table tbody td, .panel-table tbody td, .premium-table tbody td {
+    padding: 16px 18px !important;
+    vertical-align: middle !important;
+    border-bottom: 1px solid var(--border-subtle) !important;
+    background: transparent !important;
+    color: var(--text-primary) !important;
+}
+
+.table tbody tr:hover td {
+    background: rgba(255, 255, 255, 0.02) !important;
+}
+
+/* Input Fields, Selects & Textareas */
+.form-control, .form-select, .input-group-text, .filter-input {
+    background-color: #14171a !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    color: #e5e7eb !important;
+    border-radius: 9px !important;
+    padding: 9px 14px !important;
+    font-size: 0.9rem !important;
+}
+
+.form-control:focus, .form-select:focus, .filter-input:focus {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
+    background-color: #161a1e !important;
+    color: #fff !important;
+}
+
+.form-control::placeholder, textarea::placeholder {
+    color: #6b7280 !important;
+}
+
+/* Status Badges */
+.badge-active, .badge.bg-success-subtle {
+    background: rgba(16, 185, 129, 0.12) !important;
+    color: #34d399 !important;
+    border: 1px solid rgba(16, 185, 129, 0.25) !important;
+    padding: 5px 12px !important;
+    border-radius: 20px !important;
+    font-weight: 600 !important;
+}
+
+.badge-disabled, .badge.bg-danger-subtle {
+    background: rgba(239, 68, 68, 0.12) !important;
+    color: #f87171 !important;
+    border: 1px solid rgba(239, 68, 68, 0.25) !important;
+    padding: 5px 12px !important;
+    border-radius: 20px !important;
+    font-weight: 600 !important;
+}
+
+.badge-price {
+    background: rgba(16, 185, 129, 0.12) !important;
+    color: #34d399 !important;
+    font-weight: 700 !important;
+    padding: 6px 12px !important;
+    border-radius: 8px !important;
+    font-size: 0.9rem !important;
+    border: 1px solid rgba(52, 211, 153, 0.2) !important;
+}
+
+/* Buttons */
+.btn-primary {
+    background: #2563eb !important;
+    border-color: #2563eb !important;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25) !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+}
+
+.btn-primary:hover {
+    background: #1d4ed8 !important;
+    border-color: #1d4ed8 !important;
+}
+
+.action-btn {
+    width: 36px !important;
+    height: 36px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 8px !important;
+    transition: all 0.2s ease !important;
+}
+
+/* Navbar & Sidebar adjustments */
+.app-header.navbar {
+    background: #181b1f !important;
+    border-bottom: 1px solid var(--border-color) !important;
+}
+
+.app-sidebar {
+    background: #15181c !important;
+    border-right: 1px solid var(--border-color) !important;
+}
+
+.app-footer {
+    background: #15181c !important;
+    border-top: 1px solid var(--border-color) !important;
+    color: var(--text-secondary) !important;
+}
