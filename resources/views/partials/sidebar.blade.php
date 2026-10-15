@@ -48,6 +48,31 @@
                             <p>Service Sales Report</p>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a href="{{ route('admin.reports.employee') }}"
+                            class="nav-link {{ request()->routeIs('admin.reports.employee') ? 'active' : '' }}">
+                            <i class="nav-icon bi bi-person-lines-fill"></i>
+                            <p>Employee Report</p>
+                        </a>
+                    </li>
+
+                    <li class="nav-header text-uppercase text-secondary small fw-bold px-3 pt-3">Finance & Expenses</li>
+
+                    <li class="nav-item">
+                        <a href="{{ route('admin.expenses.index') }}"
+                            class="nav-link {{ request()->routeIs('admin.expenses.*') ? 'active' : '' }}">
+                            <i class="nav-icon bi bi-wallet2"></i>
+                            <p>Salon Expenses</p>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a href="{{ route('admin.expense-categories.index') }}"
+                            class="nav-link {{ request()->routeIs('admin.expense-categories.*') ? 'active' : '' }}">
+                            <i class="nav-icon bi bi-tags"></i>
+                            <p>Expense Categories</p>
+                        </a>
+                    </li>
 
                     <li class="nav-header text-uppercase text-muted fs-7">Settings</li>
                     <li class="nav-item">

@@ -317,7 +317,7 @@
 
 
     <!-- Our Team / Master Stylists Section -->
-    <section id="team" class="py-5" style="background: rgba(0, 0, 0, 0.25);">
+    <section id="team" class="py-5">
         <div class="container py-4">
             <!-- Pamagat ng Seksyon -->
             <div class="text-center mb-5">
@@ -333,7 +333,7 @@
                     border-radius: 16px;
                     padding: 30px 24px;
                     text-align: center;
-                    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+                    /* transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; */
                     height: 100%;
                     display: flex;
                     flex-direction: column;
@@ -343,7 +343,7 @@
                 .team-card:hover {
                     transform: translateY(-5px);
                     border-color: rgba(212, 175, 55, 0.4);
-                    box-shadow: 0 14px 35px rgba(0, 0, 0, 0.5);
+                    /* box-shadow: 0 14px 35px rgba(0, 0, 0, 0.5); */
                 }
 
                 .stylist-avatar-wrapper {
