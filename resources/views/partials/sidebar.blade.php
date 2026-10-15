@@ -59,30 +59,22 @@
                     </li>
                 @endrole
 
-                @role('employee')
-                    <li class="nav-header text-uppercase text-muted fs-7">Staff Portal</li>
-                    <li class="nav-item">
-                        <a href="{{ route('employee.dashboard') }}"
-                            class="nav-link {{ request()->routeIs('employee.dashboard') ? 'active' : '' }}">
-                            <i class="nav-icon bi bi-house-door"></i>
-                            <p>My Dashboard</p>
-                        </a>
-                    </li>
+                @if (auth()->user()->hasRole('employee'))
                     <li class="nav-item">
                         <a href="{{ route('employee.entries.create') }}"
-                            class="nav-link {{ request()->routeIs('employee.entries.create') ? 'active' : '' }}">
-                            <i class="nav-icon bi bi-plus-circle"></i>
+                            class="nav-link {{ request()->routeIs('employee.entries.*') ? 'active' : '' }}">
+                            <i class="nav-icon bi bi-scissors"></i>
                             <p>New Service Entry</p>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('employee.settings.profile') }}"
-                            class="nav-link {{ request()->routeIs('employee.settings.profile') ? 'active' : '' }}">
-                            <i class="nav-icon bi bi-gear-fill"></i>
-                            <p>My Profile & Security</p>
+                            class="nav-link {{ request()->routeIs('employee.settings.*') ? 'active' : '' }}">
+                            <i class="nav-icon bi bi-person-gear"></i>
+                            <p>Profile & Security</p>
                         </a>
                     </li>
-                @endrole
+                @endif
 
             </ul>
         </nav>

@@ -240,8 +240,8 @@
                                     <i class="bi bi-speedometer2 me-1"></i> Admin Portal
                                 </a>
                             @else
-                                <a href="{{ route('employee.dashboard') }}" class="btn btn-gold btn-sm px-4">
-                                    <i class="bi bi-person-workspace me-1"></i> Staff Portal
+                                <a href="{{ route('employee.entries.create') }}" class="btn btn-gold btn-sm px-4">
+                                    <i class="bi bi-scissors me-1"></i> Service Entry
                                 </a>
                             @endif
                         @else
@@ -406,55 +406,57 @@
                 }
             </style>
 
-          <!-- Talaan ng mga Stylist -->
-<div class="row g-4 justify-content-center">
-    @forelse($stylists as $stylist)
-        <div class="col-12 col-sm-6 col-lg-3">
-            <div class="team-card position-relative">
-                <!-- Stylist Avatar -->
-                <div class="stylist-avatar-wrapper">
-                    @if($stylist->photo)
-                        <img src="{{ asset('storage/' . $stylist->photo) }}" alt="{{ $stylist->name }}">
-                    @else
-                        <i class="bi bi-person-fill fs-1 text-warning"></i>
-                    @endif
-                </div>
+            <!-- Talaan ng mga Stylist -->
+            <div class="row g-4 justify-content-center">
+                @forelse($stylists as $stylist)
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <div class="team-card position-relative">
+                            <!-- Stylist Avatar -->
+                            <div class="stylist-avatar-wrapper">
+                                @if ($stylist->photo)
+                                    <img src="{{ asset('storage/' . $stylist->photo) }}" alt="{{ $stylist->name }}">
+                                @else
+                                    <i class="bi bi-person-fill fs-1 text-warning"></i>
+                                @endif
+                            </div>
 
-                <!-- Stylist Info -->
-                <h4 class="stylist-name">{{ $stylist->name }}</h4>
-                <span class="stylist-title">{{ $stylist->title ?? 'Executive Stylist' }}</span>
+                            <!-- Stylist Info -->
+                            <h4 class="stylist-name">{{ $stylist->name }}</h4>
+                            <span class="stylist-title">{{ $stylist->title ?? 'Executive Stylist' }}</span>
 
-                <p class="stylist-bio">
-                    {{ str($stylist->bio ?? 'Specialist in precision cutting, beard sculpting, and executive hair treatments.')->limit(30) }}
-                </p>
+                            <p class="stylist-bio">
+                                {{ str($stylist->bio ?? 'Specialist in precision cutting, beard sculpting, and executive hair treatments.')->limit(30) }}
+                            </p>
 
-                <!-- Action Button for Staff Access -->
-                <div class="mt-auto w-100 pt-2">
-                    @auth
-                        @if(auth()->id() === $stylist->id)
-                            <a href="{{ route('employee.entries.create') }}" class="btn btn-gold btn-sm w-100 rounded-pill py-2">
-                                <i class="bi bi-scissors me-1"></i> New Service Entry
-                            </a>
-                        @else
-                            <span class="stylist-badge d-inline-block">
-                                <i class="bi bi-patch-check-fill me-1"></i> Certified Expert
-                            </span>
-                        @endif
-                    @else
-                        <a href="{{ route('login', ['email' => $stylist->email]) }}" class="btn btn-outline-gold btn-sm w-100 rounded-pill py-2 text-decoration-none">
-                            <i class="bi bi-box-arrow-in-right me-1"></i> Stylist Access
-                        </a>
-                    @endauth
-                </div>
+                            <!-- Action Button for Staff Access -->
+                            <div class="mt-auto w-100 pt-2">
+                                @auth
+                                    @if (auth()->id() === $stylist->id)
+                                        <a href="{{ route('employee.entries.create') }}"
+                                            class="btn btn-gold btn-sm w-100 rounded-pill py-2">
+                                            <i class="bi bi-scissors me-1"></i> New Service Entry
+                                        </a>
+                                    @else
+                                        <span class="stylist-badge d-inline-block">
+                                            <i class="bi bi-patch-check-fill me-1"></i> Certified Expert
+                                        </span>
+                                    @endif
+                                @else
+                                    <a href="{{ route('login', ['email' => $stylist->email]) }}"
+                                        class="btn btn-outline-gold btn-sm w-100 rounded-pill py-2 text-decoration-none">
+                                        <i class="bi bi-box-arrow-in-right me-1"></i> Stylist Access
+                                    </a>
+                                @endauth
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="col-12 text-center py-5 text-muted">
+                        <i class="bi bi-people fs-1 d-block mb-2 text-secondary"></i>
+                        <p>Our master grooming specialists will be announced shortly.</p>
+                    </div>
+                @endforelse
             </div>
-        </div>
-    @empty
-        <div class="col-12 text-center py-5 text-muted">
-            <i class="bi bi-people fs-1 d-block mb-2 text-secondary"></i>
-            <p>Our master grooming specialists will be announced shortly.</p>
-        </div>
-    @endforelse
-</div>
 
 
         </div>
