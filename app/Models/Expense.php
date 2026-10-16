@@ -10,9 +10,9 @@ class Expense extends Model
     use HasFactory;
 
     protected $fillable = [
+        'name',
         'expense_category_id',
         'user_id',
-        'name',
         'amount',
         'expense_date',
         'note',
@@ -28,8 +28,8 @@ class Expense extends Model
         return $this->belongsTo(ExpenseCategory::class, 'expense_category_id');
     }
 
-    // Created by relationship
-    public function creator()
+    // Ei relationship-ti missing chilo, eta add koro:
+    public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
     }

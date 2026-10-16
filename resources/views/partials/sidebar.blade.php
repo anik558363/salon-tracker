@@ -41,6 +41,15 @@
                     </li>
 
                     <li class="nav-header text-uppercase text-muted fs-7">Analytics & Reports</li>
+
+                    <li class="nav-item">
+                        <a href="{{ route('admin.reports.financial-ledger') }}"
+                            class="nav-link {{ request()->routeIs('admin.reports.financial-ledger') ? 'active' : '' }}">
+                            <i class="nav-icon bi bi-journal-bookmark-fill text-warning"></i>
+                            <p>Master Ledger</p>
+                        </a>
+                    </li>
+
                     <li class="nav-item">
                         <a href="{{ route('admin.reports.service-sales') }}"
                             class="nav-link {{ request()->routeIs('admin.reports.service-sales') ? 'active' : '' }}">

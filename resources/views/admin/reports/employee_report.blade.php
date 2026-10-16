@@ -126,7 +126,7 @@
                                     value="{{ request('to_date') }}">
                             </div>
 
-                            <div class="col-1 d-flex justify-content-end gap-2 mt-2">
+                            <div class="col-1 d-flex justify-content gap-2 mt-2">
                                 <div id="loadingSpinner" class="spinner-border spinner-border-sm text-warning me-2 d-none"
                                     role="status"></div>
                                 <button type="button" id="resetFiltersBtn"

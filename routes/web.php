@@ -15,6 +15,8 @@ use App\Http\Controllers\Employee\ProfileSettingsController as EmployeeProfileSe
 use App\Http\Controllers\Admin\EmployeeReportController;
 use App\Models\Service;
 use App\Models\User;
+use App\Http\Controllers\Admin\FinancialLedgerController;
+
 
 // পাবলিক হোমপেজ
 Route::get('/', function () {
@@ -78,6 +80,7 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/settings/password', [ProfileSettingsController::class, 'updatePassword'])->name('settings.password.update');
 
 
+Route::get('/reports/financial-ledger', [FinancialLedgerController::class, 'index'])->name('reports.financial-ledger');
 
         // Employee Activity & Service Report
         Route::get('/reports/employee-performance', [EmployeeReportController::class, 'index'])->name('reports.employee');

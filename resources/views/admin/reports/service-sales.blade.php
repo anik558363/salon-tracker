@@ -13,7 +13,7 @@
             </div>
             <div>
                 <span class="text-muted small text-uppercase fw-semibold">Total Services Rendered</span>
-                <h3 class="mb-0 fw-bold text-light">{{ number_format($overallTotalSold) }} <span class="fs-6 text-muted fw-normal">times</span></h3>
+                <h3 class="mb-0 fw-bold text-light" id="metricTotalSold">{{ number_format($overallTotalSold) }} <span class="fs-6 text-muted fw-normal">times</span></h3>
             </div>
         </div>
     </div>
@@ -24,7 +24,7 @@
             </div>
             <div>
                 <span class="text-muted small text-uppercase fw-semibold">Total Revenue Generated</span>
-                <h3 class="mb-0 fw-bold text-success">AED {{ number_format($overallTotalRevenue, 2) }}</h3>
+                <h3 class="mb-0 fw-bold text-success" id="metricTotalRevenue">AED {{ number_format($overallTotalRevenue, 2) }}</h3>
             </div>
         </div>
     </div>
@@ -33,18 +33,36 @@
 <div class="row">
     <div class="col-12">
         <div class="premium-card mb-4">
-            <!-- Filter & Search Bar -->
+            <!-- Filter & Search Bar (AJAX Controlled) -->
             <div class="p-4 border-bottom border-secondary border-opacity-10">
-                <form action="{{ route('admin.reports.service-sales') }}" method="GET">
-                    <div class="row g-3 align-items-center">
-                        <div class="col-lg-3 col-md-6">
+                <form id="serviceReportFilterForm" onsubmit="return false;">
+                    <div class="row g-3 align-items-end">
+                        <!-- Keyboard Live Search Input -->
+                        <div class="col-lg-2 col-md-6">
                             <label class="form-label text-muted small mb-1">Search Service</label>
-                            <input type="text" name="search" class="form-control filter-input" placeholder="Service name..." value="{{ request('search') }}">
+                            <div class="input-group">
+
+                                <input type="text" id="liveSearchInput" name="search" class="form-control filter-input" placeholder="Type service name..." value="{{ request('search') }}">
+                            </div>
                         </div>
 
+                        <!-- Service Dropdown Filter -->
                         <div class="col-lg-3 col-md-6">
+                            <label class="form-label text-muted small mb-1">Select Service</label>
+                            <select name="service_id" class="form-select filter-input auto-trigger">
+                                <option value="">All Services Offering</option>
+                                @foreach($allServices as $srv)
+                                    <option value="{{ $srv->id }}" {{ request('service_id') == $srv->id ? 'selected' : '' }}>
+                                        {{ $srv->name }} (AED {{ number_format($srv->price, 2) }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Period Presets -->
+                        <div class="col-lg-2 col-md-4">
                             <label class="form-label text-muted small mb-1">Time Period</label>
-                            <select name="period" class="form-select filter-input" onchange="this.form.submit()">
+                            <select name="period" class="form-select filter-input auto-trigger">
                                 <option value="">Custom Date Range</option>
                                 <option value="today" {{ request('period') === 'today' ? 'selected' : '' }}>Today</option>
                                 <option value="this_week" {{ request('period') === 'this_week' ? 'selected' : '' }}>This Week</option>
@@ -53,25 +71,23 @@
                             </select>
                         </div>
 
+                        <!-- Start Date -->
                         <div class="col-lg-2 col-md-4">
                             <label class="form-label text-muted small mb-1">Start Date</label>
-                            <input type="date" name="start_date" class="form-control filter-input" value="{{ $startDate }}">
+                            <input type="date" name="start_date" class="form-control filter-input auto-trigger" value="{{ $startDate }}">
                         </div>
 
+                        <!-- End Date -->
                         <div class="col-lg-2 col-md-4">
                             <label class="form-label text-muted small mb-1">End Date</label>
-                            <input type="date" name="end_date" class="form-control filter-input" value="{{ $endDate }}">
+                            <input type="date" name="end_date" class="form-control filter-input auto-trigger" value="{{ $endDate }}">
                         </div>
 
-                        <div class="col-lg-2 col-md-4 d-flex gap-2 align-items-end" style="height: 60px;">
-                            <button type="submit" class="btn btn-primary w-100 py-2 rounded-3 fw-semibold">
-                                <i class="bi bi-funnel me-1"></i> Filter
+                        <div class="col-1 d-flex justify-content-end gap-2 mt-2">
+                            <div id="loadingSpinner" class="spinner-border spinner-border-sm text-warning me-2 d-none" role="status"></div>
+                            <button type="button" id="resetFiltersBtn" class="btn btn-outline-secondary px-4 py-2 rounded-3 ">
+                                <i class="bi bi-arrow-clockwise me-1"></i> Reset
                             </button>
-                            @if(request()->hasAny(['search', 'period', 'start_date', 'end_date']))
-                                <a href="{{ route('admin.reports.service-sales') }}" class="btn btn-outline-secondary px-3 py-2 rounded-3" title="Clear Filters">
-                                    <i class="bi bi-arrow-clockwise"></i>
-                                </a>
-                            @endif
                         </div>
                     </div>
                 </form>
@@ -85,8 +101,9 @@
                 </div>
             </div>
 
-            <!-- Services & Customers Table -->
-            <div class="table-responsive">
+            <!-- Table Container for AJAX -->
+            <div class="table-responsive" id="serviceReportTableContainer">
+                @section('table_content')
                 <table class="table premium-table align-middle">
                     <thead>
                         <tr>
@@ -100,7 +117,7 @@
                     <tbody>
                         @forelse($serviceSales as $service)
                         <tr>
-                            <td class="ps-4 text-muted fw-semibold">{{ $loop->iteration + ($serviceSales->currentPage() - 1) * $serviceSales->perPage() }}</td>
+                            <td class="ps-4 text-muted fw-semibold">{{ $loop->iteration + ($serviceSales->currentPage() - 1) *$serviceSales->perPage() }}</td>
                             <td>
                                 <div class="fw-bold text-light fs-6 mb-1">{{ $service->name }}</div>
                                 <span class="badge bg-secondary bg-opacity-25 text-secondary border border-secondary border-opacity-25" style="font-size: 0.72rem;">
@@ -147,7 +164,8 @@
                                                 @foreach($service->entryItems as $item)
                                                 <tr class="border-bottom border-secondary border-opacity-10">
                                                     <td class="text-muted font-monospace">
-                                                        {{ $item->serviceEntry->entry_date ?? '' }} ({{ $item->serviceEntry->created_at->format('h:i A') }})
+                                                        {{ $item->serviceEntry->entry_date ? \Carbon\Carbon::parse($item->serviceEntry->entry_date)->format('d M, Y') : '' }}
+                                                        ({{ $item->serviceEntry->created_at ? $item->serviceEntry->created_at->format('h:i A') : '' }})
                                                     </td>
                                                     <td class="fw-semibold text-white">
                                                         {{ $item->serviceEntry->customer->name ?? 'Walk-in Client' }}
@@ -160,7 +178,7 @@
                                                             {{ $item->serviceEntry->employee->name ?? 'Staff' }}
                                                         </span>
                                                     </td>
-                                                    <td class="text-end fw-bold text-success">
+                                                    <td class="text-end fw-bold text-success font-monospace">
                                                         AED {{ number_format($item->price, 2) }}
                                                     </td>
                                                 </tr>
@@ -177,20 +195,104 @@
                         <tr>
                             <td colspan="5" class="text-center py-5 text-muted">
                                 <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
-                                No service records found for this period.
+                                No service records found for the selected filters.
                             </td>
                         </tr>
                         @endforelse
                     </tbody>
                 </table>
-            </div>
 
-            @if($serviceSales->hasPages())
-                <div class="p-3 border-top border-secondary border-opacity-10 d-flex justify-content-end">
-                    {{ $serviceSales->links() }}
-                </div>
-            @endif
+                @if($serviceSales->hasPages())
+                    <div class="p-3 border-top border-secondary border-opacity-10 d-flex justify-content-end" id="ajaxPaginationWrapper">
+                        {{ $serviceSales->links('pagination::bootstrap-5') }}
+                    </div>
+                @endif
+                @show
+            </div>
         </div>
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('serviceReportFilterForm');
+        const searchInput = document.getElementById('liveSearchInput');
+        const autoTriggers = document.querySelectorAll('.auto-trigger');
+        const resetBtn = document.getElementById('resetFiltersBtn');
+        const tableContainer = document.getElementById('serviceReportTableContainer');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const metricSold = document.getElementById('metricTotalSold');
+        const metricRevenue = document.getElementById('metricTotalRevenue');
+
+        let debounceTimer;
+
+        function fetchServiceReport(url = "{{ route('admin.reports.service-sales') }}") {
+            loadingSpinner.classList.remove('d-none');
+
+            const formData = new FormData(form);
+            const params = new URLSearchParams(formData);
+            const targetUrl = url.includes('?') ? `${url}&${params.toString()}` : `${url}?${params.toString()}`;
+
+            fetch(targetUrl, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                tableContainer.innerHTML = data.table;
+                if (metricSold && data.overallTotalSold) {
+                    metricSold.innerHTML = `${data.overallTotalSold}`;
+                }
+                if (metricRevenue && data.overallTotalRevenue) {
+                    metricRevenue.textContent = data.overallTotalRevenue;
+                }
+                attachPaginationEvents();
+            })
+            .catch(err => console.error("AJAX Error:", err))
+            .finally(() => {
+                loadingSpinner.classList.add('d-none');
+            });
+        }
+
+        // Live keyboard search with debounce
+        searchInput.addEventListener('input', function () {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                fetchServiceReport();
+            }, 350);
+        });
+
+        // Dropdown changes trigger AJAX immediately
+        autoTriggers.forEach(input => {
+            input.addEventListener('change', function () {
+                fetchServiceReport();
+            });
+        });
+
+        // Reset button
+        resetBtn.addEventListener('click', function () {
+            form.reset();
+            fetchServiceReport();
+        });
+
+        // AJAX pagination links
+        function attachPaginationEvents() {
+            const paginationLinks = tableContainer.querySelectorAll('#ajaxPaginationWrapper a');
+            paginationLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const href = this.getAttribute('href');
+                    if (href) {
+                        fetchServiceReport(href);
+                    }
+                });
+            });
+        }
+
+        attachPaginationEvents();
+    });
+</script>
+@endpush
