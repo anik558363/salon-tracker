@@ -81,6 +81,8 @@ Route::middleware(['auth'])->group(function () {
 
         // Employee Activity & Service Report
         Route::get('/reports/employee-performance', [EmployeeReportController::class, 'index'])->name('reports.employee');
+        Route::get('/reports/employee-performance', [EmployeeReportController::class, 'index'])->name('reports.employee');
+        Route::post('/reports/employee-salary-pay', [EmployeeReportController::class, 'paySalary'])->name('reports.employee.pay-salary');
     });
 
     // এমপ্লয়ি প্যানেল (ড্যাশবোর্ড ছাড়া, সরাসরি সার্ভিস এন্ট্রি ও প্রোফাইল সেটিংস)

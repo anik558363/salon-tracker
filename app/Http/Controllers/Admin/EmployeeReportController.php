@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use App\Models\Service;
 use App\Models\ServiceEntry;
+use App\Models\EmployeeSalary;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -16,10 +17,8 @@ class EmployeeReportController extends Controller
         $allEmployees = User::role('employee')->orderBy('name')->get();
         $services     = Service::orderBy('name')->get();
 
-        // এমপ্লয়ি-ভিত্তিক কুয়েরি
         $employeeQuery = User::role('employee');
 
-        // এমপ্লয়ি ড্রপডাউন বা নাম দিয়ে ফিল্টার
         if ($request->filled('employee_id')) {
             $employeeQuery->where('id', $request->employee_id);
         }
@@ -32,7 +31,6 @@ class EmployeeReportController extends Controller
             });
         }
 
-        // রিলেশনশিপ এবং এগ্রিগেশন লোড (তারিখ এবং সার্ভিস ফিল্টারসহ)
         $employeeQuery->with(['serviceEntries' => function ($q) use ($request) {
             if ($request->filled('service_id')) {
                 $q->whereHas('items', function ($sq) use ($request) {
@@ -46,37 +44,40 @@ class EmployeeReportController extends Controller
                 $q->whereDate('entry_date', '<=', $request->to_date);
             }
             $q->with(['customer', 'items.service']);
+        }, 'salaryPayments' => function ($q) {
+            $q->latest('payment_date')->latest('id');
         }])
-            ->withCount(['serviceEntries as total_entries' => function ($q) use ($request) {
-                if ($request->filled('service_id')) {
-                    $q->whereHas('items', function ($sq) use ($request) {
-                        $sq->where('service_id', $request->service_id);
-                    });
-                }
-                if ($request->filled('from_date')) {
-                    $q->whereDate('entry_date', '>=', $request->from_date);
-                }
-                if ($request->filled('to_date')) {
-                    $q->whereDate('entry_date', '<=', $request->to_date);
-                }
-            }])
-            ->withSum(['serviceEntries as total_revenue' => function ($q) use ($request) {
-                if ($request->filled('service_id')) {
-                    $q->whereHas('items', function ($sq) use ($request) {
-                        $sq->where('service_id', $request->service_id);
-                    });
-                }
-                if ($request->filled('from_date')) {
-                    $q->whereDate('entry_date', '>=', $request->from_date);
-                }
-                if ($request->filled('to_date')) {
-                    $q->whereDate('entry_date', '<=', $request->to_date);
-                }
-            }], 'total_amount');
+        ->withCount(['serviceEntries as total_entries' => function ($q) use ($request) {
+            if ($request->filled('service_id')) {
+                $q->whereHas('items', function ($sq) use ($request) {
+                    $sq->where('service_id', $request->service_id);
+                });
+            }
+            if ($request->filled('from_date')) {
+                $q->whereDate('entry_date', '>=', $request->from_date);
+            }
+            if ($request->filled('to_date')) {
+                $q->whereDate('entry_date', '<=', $request->to_date);
+            }
+        }])
+        ->withSum(['serviceEntries as total_revenue' => function ($q) use ($request) {
+            if ($request->filled('service_id')) {
+                $q->whereHas('items', function ($sq) use ($request) {
+                    $sq->where('service_id', $request->service_id);
+                });
+            }
+            if ($request->filled('from_date')) {
+                $q->whereDate('entry_date', '>=', $request->from_date);
+            }
+            if ($request->filled('to_date')) {
+                $q->whereDate('entry_date', '<=', $request->to_date);
+            }
+        }], 'total_amount')
+        ->withSum('salaryPayments as total_paid', 'amount');
 
         $employees = $employeeQuery->paginate(15)->withQueryString();
 
-        // ওভারঅল সামারি মেট্রিক্স
+        // Overall summary metrics calculation
         $overallEntriesQuery = ServiceEntry::query();
         if ($request->filled('employee_id')) {
             $overallEntriesQuery->where('employee_id', $request->employee_id);
@@ -93,17 +94,62 @@ class EmployeeReportController extends Controller
             $overallEntriesQuery->whereDate('entry_date', '<=', $request->to_date);
         }
 
-        $totalEntries = $overallEntriesQuery->count();
-        $totalRevenue = $overallEntriesQuery->sum('total_amount');
+        $totalEntries     = $overallEntriesQuery->count();
+        $totalRevenue     = $overallEntriesQuery->sum('total_amount');
+        $totalSalary40    = $totalRevenue * 0.40;
+
+        // Filter employee onushare total paid hishab
+        $paidQuery = EmployeeSalary::query();
+        if ($request->filled('employee_id')) {
+            $paidQuery->where('employee_id', $request->employee_id);
+        }
+        $totalPaidOverall = $paidQuery->sum('amount');
+        $totalDueOverall  = max(0, $totalSalary40 - $totalPaidOverall);
 
         if ($request->ajax()) {
             return response()->json([
-                'table'        => view('admin.reports.employee_report', compact('employees', 'allEmployees', 'services', 'totalEntries', 'totalRevenue'))->renderSections()['table_content'],
+                'table'        => view('admin.reports.employee_report', compact(
+                    'employees', 'allEmployees', 'services', 'totalEntries',
+                    'totalRevenue', 'totalSalary40', 'totalPaidOverall', 'totalDueOverall'
+                ))->renderSections()['table_content'],
                 'totalEntries' => $totalEntries,
                 'totalRevenue' => 'AED ' . number_format($totalRevenue, 2),
+                'totalSalary'  => 'AED ' . number_format($totalDueOverall, 2),
+                'totalPaid'    => 'AED ' . number_format($totalPaidOverall, 2),
             ]);
         }
 
-        return view('admin.reports.employee_report', compact('employees', 'allEmployees', 'services', 'totalEntries', 'totalRevenue'));
+        return view('admin.reports.employee_report', compact(
+            'employees',
+            'allEmployees',
+            'services',
+            'totalEntries',
+            'totalRevenue',
+            'totalSalary40',
+            'totalPaidOverall',
+            'totalDueOverall'
+        ));
+    }
+
+    public function paySalary(Request $request)
+    {
+        $request->validate([
+            'employee_id'    => 'required|exists:users,id',
+            'amount'         => 'required|numeric|min:0.01',
+            'payment_date'   => 'required|date',
+            'payment_method' => 'required|string',
+            'note'           => 'nullable|string|max:255',
+        ]);
+
+        EmployeeSalary::create([
+            'employee_id'    => $request->employee_id,
+            'paid_by'        => auth()->id(),
+            'amount'         => $request->amount,
+            'payment_date'   => $request->payment_date,
+            'payment_method' => $request->payment_method,
+            'note'           => $request->note,
+        ]);
+
+        return redirect()->back()->with('success', 'Salary payout recorded successfully!');
     }
 }

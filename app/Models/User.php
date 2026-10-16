@@ -32,6 +32,11 @@ class User extends Authenticatable
         return $this->hasMany(ServiceEntry::class, 'employee_id');
     }
 
+    public function salaryPayments()
+{
+    return $this->hasMany(\App\Models\EmployeeSalary::class, 'employee_id');
+}
+
     /**
      * The attributes that should be hidden for serialization.
      *
