@@ -36,7 +36,7 @@
 
         .service-pos-img {
             width: 100%;
-            height: 110px;
+            height: 200px;
             object-fit: cover;
             background: #131518;
         }

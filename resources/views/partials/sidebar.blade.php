@@ -65,6 +65,14 @@
                         </a>
                     </li>
 
+                    <li class="nav-item">
+                        <a href="{{ route('admin.reports.income') }}"
+                            class="nav-link {{ request()->routeIs('admin.reports.income') ? 'active' : '' }}">
+                            <i class="nav-icon bi bi-graph-up text-success"></i>
+                            <p>Income Report</p>
+                        </a>
+                    </li>
+
                     <li class="nav-header text-uppercase text-secondary small fw-bold px-3 pt-3">Finance & Expenses</li>
 
                     <li class="nav-item">

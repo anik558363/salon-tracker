@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\EmployeeReportController;
 use App\Models\Service;
 use App\Models\User;
 use App\Http\Controllers\Admin\FinancialLedgerController;
+use App\Http\Controllers\Admin\IncomeReportController;
 
 
 // পাবলিক হোমপেজ
@@ -80,7 +81,10 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/settings/password', [ProfileSettingsController::class, 'updatePassword'])->name('settings.password.update');
 
 
-Route::get('/reports/financial-ledger', [FinancialLedgerController::class, 'index'])->name('reports.financial-ledger');
+Route::get('/reports/income-statement', [IncomeReportController::class, 'index'])->name('reports.income');
+
+
+        Route::get('/reports/financial-ledger', [FinancialLedgerController::class, 'index'])->name('reports.financial-ledger');
 
         // Employee Activity & Service Report
         Route::get('/reports/employee-performance', [EmployeeReportController::class, 'index'])->name('reports.employee');

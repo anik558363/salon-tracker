@@ -57,9 +57,7 @@
                     <div class="row g-3 align-items-center">
                         <div class="col-lg-6 col-md-6">
                             <div class="input-group">
-                                <span class="input-group-text bg-dark border-secondary border-opacity-25 text-muted">
-                                    <i class="bi bi-search"></i>
-                                </span>
+                               
                                 <input type="text" id="liveSearchInput" name="search" class="form-control filter-input" placeholder="Search by staff name or email..." value="{{ request('search') }}">
                             </div>
                         </div>
