@@ -28,21 +28,29 @@ class ServiceEntryController extends Controller
         ]);
 
         DB::transaction(function () use ($request) {
-            // Customer handling
             $customerId = null;
-            if ($request->filled('customer_phone') || $request->filled('customer_name')) {
+
+            // ফোন নম্বর থাকলে ফোন দিয়ে চেক/তৈরি
+            if ($request->filled('customer_phone')) {
                 $customer = Customer::firstOrCreate(
                     ['phone' => $request->customer_phone],
-                    ['name'  => $request->customer_name]
+                    ['name'  => $request->customer_name ?? 'Walk-in Client']
                 );
+                $customerId = $customer->id;
+            } elseif ($request->filled('customer_name')) {
+                // শুধু নাম থাকলে নতুন ক্লায়েন্ট তৈরি
+                $customer = Customer::create([
+                    'name'  => $request->customer_name,
+                    'phone' => null,
+                ]);
                 $customerId = $customer->id;
             }
 
-            // Selected services price calculation
+            // সার্ভিসের বর্তমান রেট রিড করা
             $selectedServices = Service::whereIn('id', $request->services)->get();
             $totalAmount = $selectedServices->sum('price');
 
-            // Parent service entry toiri
+            // মূল ইনভয়েস/এন্ট্রি তৈরি (মোট বিল এখানে লক থাকবে)
             $entry = ServiceEntry::create([
                 'employee_id'  => auth()->id(),
                 'customer_id'  => $customerId,
@@ -51,7 +59,7 @@ class ServiceEntryController extends Controller
                 'note'         => $request->note,
             ]);
 
-            // Item-wise snapshot price save kora
+            // প্রতিটি আইটেমে তখনকার রেটের স্ন্যাপশট সেভ করা
             foreach ($selectedServices as $service) {
                 $entry->items()->create([
                     'service_id' => $service->id,
@@ -60,7 +68,6 @@ class ServiceEntryController extends Controller
             }
         });
 
-        // Dashboard route na thakay abar notun service entry page-e redirect kora holo
         return redirect()->route('employee.entries.create')->with('success', 'Service entry saved successfully!');
     }
 }

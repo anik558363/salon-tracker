@@ -17,7 +17,6 @@ class ServiceEntry extends Model
         'note',
     ];
 
-    // entry_date ke date/Carbon hishebe cast kora
     protected $casts = [
         'entry_date'   => 'date',
         'total_amount' => 'decimal:2',
@@ -30,11 +29,12 @@ class ServiceEntry extends Model
 
     public function customer()
     {
-        return $this->belongsTo(Customer::class, 'customer_id');
+        return $this->belongsTo(Customer::class);
     }
 
+    // Ei relationship-ti ensure koro
     public function items()
     {
-        return $this->hasMany(ServiceEntryItem::class);
+        return $this->hasMany(ServiceEntryItem::class, 'service_entry_id');
     }
 }

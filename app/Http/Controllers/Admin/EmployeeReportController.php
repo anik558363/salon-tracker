@@ -131,25 +131,49 @@ class EmployeeReportController extends Controller
         ));
     }
 
-    public function paySalary(Request $request)
-    {
-        $request->validate([
-            'employee_id'    => 'required|exists:users,id',
-            'amount'         => 'required|numeric|min:0.01',
-            'payment_date'   => 'required|date',
-            'payment_method' => 'required|string',
-            'note'           => 'nullable|string|max:255',
-        ]);
+   public function paySalary(Request $request)
+{
+    $request->validate([
+        'employee_id'    => 'required|exists:users,id',
+        'amount'         => 'required|numeric|min:0.01',
+        'payment_date'   => 'required|date',
+        'payment_method' => 'required|string',
+        'note'           => 'nullable|string|max:255',
+    ]);
 
-        EmployeeSalary::create([
-            'employee_id'    => $request->employee_id,
-            'paid_by'        => auth()->id(),
-            'amount'         => $request->amount,
-            'payment_date'   => $request->payment_date,
-            'payment_method' => $request->payment_method,
-            'note'           => $request->note,
-        ]);
+    // ১. এমপ্লয়ির মোট সার্ভিস রেভিনিউ থেকে ৪০% হিসাব
+    $employee = User::withSum('serviceEntries as total_revenue', 'total_amount')
+                    ->withSum('salaryPayments as total_paid', 'amount')
+                    ->findOrFail($request->employee_id);
 
-        return redirect()->back()->with('success', 'Salary payout recorded successfully!');
+    $totalRevenue = $employee->total_revenue ?? 0;
+    $totalSalary40 = $totalRevenue * 0.40;
+    $totalPaid = $employee->total_paid ?? 0;
+
+    // বর্তমান ডিউ ব্যালেন্স
+    $currentDue = max(0, $totalSalary40 - $totalPaid);
+
+    // ২. শর্ত ১: কোনো ডিউ ব্যালেন্স না থাকলে পেমেন্ট নেওয়া যাবে না
+    if ($currentDue <= 0) {
+        return redirect()->back()->with('error', 'এই কর্মচারীর কোনো বকেয়া (Due Balance) নেই, তাই পে করা যাবে না!');
     }
+
+    // ৩. শর্ত ২: পে করার পরিমাণ ব্যালেন্সের চেয়ে বেশি হতে পারবে না
+    if ($request->amount > $currentDue) {
+        return redirect()->back()->with('error', 'পে করার পরিমাণ বর্তমান বকেয়া (AED ' . number_format($currentDue, 2) . ') এর চেয়ে বেশি হতে পারবে না!');
+    }
+
+    // সব ঠিক থাকলে পেমেন্ট সেভ হবে
+    EmployeeSalary::create([
+        'employee_id'    => $request->employee_id,
+        'paid_by'        => auth()->id(),
+        'amount'         => $request->amount,
+        'payment_date'   => $request->payment_date,
+        'payment_method' => $request->payment_method,
+        'note'           => $request->note,
+    ]);
+
+    return redirect()->back()->with('success', 'Salary payout recorded successfully!');
+}
+
 }

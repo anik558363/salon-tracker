@@ -68,6 +68,13 @@
         </div>
     @endif
 
+    @if(session('error'))
+    <div class="alert alert-danger bg-opacity-10 border-danger border-opacity-25 text-danger alert-dismissible fade show mb-4">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ session('error') }}
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+    </div>
+@endif
+
     <div class="row">
         <div class="col-12">
             <div class="premium-card mb-4">
@@ -196,10 +203,18 @@
                                     </td>
                                     <td class="text-center pe-4">
                                         <div class="btn-group btn-group-sm">
-                                            <button class="btn btn-outline-success rounded-3 me-1" data-bs-toggle="modal"
-                                                data-bs-target="#payModal-{{ $employee->id }}">
-                                                <i class="bi bi-cash me-1"></i> Pay
-                                            </button>
+                                            @if ($empDue > 0)
+                                                <button class="btn btn-outline-success rounded-3 me-1"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#payModal-{{ $employee->id }}">
+                                                    <i class="bi bi-cash me-1"></i> Pay
+                                                </button>
+                                            @else
+                                                <button class="btn btn-outline-secondary rounded-3 me-1 opacity-50"
+                                                    disabled title="No Due Balance">
+                                                    <i class="bi bi-cash me-1"></i> Pay
+                                                </button>
+                                            @endif
                                             <button class="btn btn-outline-info rounded-3 me-1" data-bs-toggle="modal"
                                                 data-bs-target="#paymentHistoryModal-{{ $employee->id }}">
                                                 <i class="bi bi-clock-history"></i> History
@@ -274,13 +289,21 @@
                                                 </div>
                                             </div>
 
+
+
                                             <div class="mb-3">
                                                 <label class="form-label text-muted small fw-semibold">Payment Amount
                                                     (AED)</label>
-                                                <input type="number" step="0.01" name="amount"
+                                                <input type="number" step="0.01" min="0.01"
+                                                    max="{{ $empDue }}" name="amount"
                                                     class="form-control filter-input"
                                                     value="{{ $empDue > 0 ? $empDue : '' }}"
-                                                    placeholder="Enter payout amount" required>
+                                                    placeholder="Maximum payable: AED {{ number_format($empDue, 2) }}"
+                                                    required>
+                                                <small class="text-secondary d-block mt-1">
+                                                    * Maximum payable amount: <span class="text-danger font-monospace">AED
+                                                        {{ number_format($empDue, 2) }}</span>
+                                                </small>
                                             </div>
 
                                             <div class="row g-2 mb-3">
