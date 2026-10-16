@@ -95,7 +95,7 @@
             </div>
             <div>
                 <span class="text-muted small text-uppercase fw-semibold">Total Services</span>
-                <h4 class="mb-0 fw-bold text-light">{{ $services->total() }}</h4>
+                <h4 class="mb-0 fw-bold text-light font-monospace" id="metricTotalServices">{{ $totalServicesCount ?? $services->total() }}</h4>
             </div>
         </div>
     </div>
@@ -106,7 +106,7 @@
             </div>
             <div>
                 <span class="text-muted small text-uppercase fw-semibold">Active Services</span>
-                <h4 class="mb-0 fw-bold text-light">{{ \App\Models\Service::where('status', true)->count() }}</h4>
+                <h4 class="mb-0 fw-bold text-light font-monospace" id="metricActiveServices">{{ $activeServicesCount ?? \App\Models\Service::where('status', true)->count() }}</h4>
             </div>
         </div>
     </div>
@@ -117,7 +117,7 @@
             </div>
             <div>
                 <span class="text-muted small text-uppercase fw-semibold">Average Price</span>
-                <h4 class="mb-0 fw-bold text-light">AED {{ number_format(\App\Models\Service::avg('price') ?? 0, 2) }}</h4>
+                <h4 class="mb-0 fw-bold text-light font-monospace" id="metricAveragePrice">AED {{ number_format($averagePrice ?? (\App\Models\Service::avg('price') ?? 0), 2) }}</h4>
             </div>
         </div>
     </div>
@@ -133,18 +133,19 @@
         @endif
 
         <div class="premium-card mb-4">
-            <!-- Filter Section -->
+            <!-- Filter Section (AJAX) -->
             <div class="p-4 border-bottom border-secondary border-opacity-10">
-                <form action="{{ route('admin.services.index') }}" method="GET">
+                <form id="serviceFilterForm" onsubmit="return false;">
                     <div class="row g-3 align-items-center">
                         <div class="col-lg-4 col-md-6">
                             <div class="input-group">
-                                <input type="text" name="search" class="form-control filter-input border-start-0" placeholder="Search service or description..." value="{{ request('search') }}">
+                                
+                                <input type="text" id="liveSearchInput" name="search" class="form-control filter-input" placeholder="Type service name or description..." value="{{ request('search') }}">
                             </div>
                         </div>
 
                         <div class="col-lg-3 col-md-3">
-                            <select name="status" class="form-select filter-input">
+                            <select name="status" class="form-select filter-input auto-trigger">
                                 <option value="">Filter by Status (All)</option>
                                 <option value="1" {{ request('status') === '1' ? 'selected' : '' }}>Active Only</option>
                                 <option value="0" {{ request('status') === '0' ? 'selected' : '' }}>Disabled Only</option>
@@ -152,22 +153,18 @@
                         </div>
 
                         <div class="col-lg-3 col-md-3">
-                            <select name="sort" class="form-select filter-input">
+                            <select name="sort" class="form-select filter-input auto-trigger">
                                 <option value="">Sort: Newest First</option>
                                 <option value="price_asc" {{ request('sort') === 'price_asc' ? 'selected' : '' }}>Price: Low to High</option>
                                 <option value="price_desc" {{ request('sort') === 'price_desc' ? 'selected' : '' }}>Price: High to Low</option>
                             </select>
                         </div>
 
-                        <div class="col-lg-2 col-md-12 d-flex gap-2">
-                            <button type="submit" class="btn btn-primary w-100 py-2 rounded-3 fw-semibold">
-                                <i class="bi bi-funnel me-1"></i> Apply
+                        <div class="col-lg-2 col-md-12 d-flex justify-content-end align-items-center gap-2">
+                            <div id="loadingSpinner" class="spinner-border spinner-border-sm text-warning d-none" role="status"></div>
+                            <button type="button" id="resetBtn" class="btn btn-outline-secondary w-100 py-2 rounded-3 fw-semibold" title="Reset Filters">
+                                <i class="bi bi-arrow-clockwise me-1"></i> Reset
                             </button>
-                            @if(request()->hasAny(['search', 'status', 'sort']))
-                                <a href="{{ route('admin.services.index') }}" class="btn btn-outline-secondary px-3 py-2 rounded-3" title="Clear Filters">
-                                    <i class="bi bi-arrow-clockwise"></i>
-                                </a>
-                            @endif
                         </div>
                     </div>
                 </form>
@@ -184,8 +181,9 @@
                 </a>
             </div>
 
-            <!-- Table -->
-            <div class="table-responsive">
+            <!-- Table Container for AJAX -->
+            <div class="table-responsive" id="serviceTableContainer">
+                @section('table_content')
                 <table class="table premium-table align-middle">
                     <thead>
                         <tr>
@@ -201,7 +199,7 @@
                     <tbody>
                         @forelse($services as $service)
                         <tr>
-                            <td class="ps-4 text-muted fw-semibold">{{ $loop->iteration + ($services->currentPage() - 1) * $services->perPage() }}</td>
+                            <td class="ps-4 text-muted fw-semibold">{{ $loop->iteration + ($services->currentPage() - 1) *$services->perPage() }}</td>
                             <td>
                                 @if($service->image)
                                     <img src="{{ asset('storage/' . $service->image) }}" alt="{{ $service->name }}" class="rounded-3 border border-secondary border-opacity-25 object-fit-cover" style="width: 46px; height: 46px;">
@@ -218,7 +216,7 @@
                                 </div>
                             </td>
                             <td class="text-center">
-                                <span class="badge-price">AED {{ number_format($service->price, 2) }}</span>
+                                <span class="badge-price font-monospace">AED {{ number_format($service->price, 2) }}</span>
                             </td>
                             <td class="text-center">
                                 @if($service->status)
@@ -239,7 +237,7 @@
                                         </button>
                                     </form>
 
-                                    <!-- Edit Button (Directs to edit page) -->
+                                    <!-- Edit Button -->
                                     <a href="{{ route('admin.services.edit', $service->id) }}" class="btn btn-sm btn-outline-primary action-btn" title="Edit Service">
                                         <i class="bi bi-pencil-fill"></i>
                                     </a>
@@ -250,26 +248,109 @@
                         <tr>
                             <td colspan="7" class="text-center py-5 text-muted">
                                 <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
-                                @if(request('search'))
-                                    No services matching "<strong>{{ request('search') }}</strong>".
-                                @else
-                                    No services found in database.
-                                @endif
+                                No services found matching criteria.
                             </td>
                         </tr>
                         @endforelse
                     </tbody>
                 </table>
-            </div>
 
-            @if($services->hasPages())
-                <div class="p-3 border-top border-secondary border-opacity-10 d-flex justify-content-end">
-                    {{ $services->links() }}
-                </div>
-            @endif
+                @if($services->hasPages())
+                    <div class="p-3 border-top border-secondary border-opacity-10 d-flex justify-content-end" id="ajaxPaginationWrapper">
+                        {{ $services->links('pagination::bootstrap-5') }}
+                    </div>
+                @endif
+                @show
+            </div>
         </div>
     </div>
 </div>
 @endsection
 
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('serviceFilterForm');
+        const searchInput = document.getElementById('liveSearchInput');
+        const autoTriggers = document.querySelectorAll('.auto-trigger');
+        const resetBtn = document.getElementById('resetBtn');
+        const tableContainer = document.getElementById('serviceTableContainer');
+        const loadingSpinner = document.getElementById('loadingSpinner');
 
+        const metricTotal = document.getElementById('metricTotalServices');
+        const metricActive = document.getElementById('metricActiveServices');
+        const metricAverage = document.getElementById('metricAveragePrice');
+
+        let debounceTimer;
+
+        function fetchServices(url = "{{ route('admin.services.index') }}") {
+            loadingSpinner.classList.remove('d-none');
+
+            const formData = new FormData(form);
+            const params = new URLSearchParams(formData);
+            const targetUrl = url.includes('?') ? `${url}&${params.toString()}` : `${url}?${params.toString()}`;
+
+            fetch(targetUrl, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                tableContainer.innerHTML = data.table;
+                if (metricTotal && data.totalServices) {
+                    metricTotal.textContent = data.totalServices;
+                }
+                if (metricActive && data.activeServices) {
+                    metricActive.textContent = data.activeServices;
+                }
+                if (metricAverage && data.averagePrice) {
+                    metricAverage.textContent = data.averagePrice;
+                }
+                attachPaginationEvents();
+            })
+            .catch(err => console.error("AJAX Error:", err))
+            .finally(() => {
+                loadingSpinner.classList.add('d-none');
+            });
+        }
+
+        // কী-বোর্ডে টাইপ করার সাথে সাথে লাইভ সার্চ (350ms Debounced)
+        searchInput.addEventListener('input', function () {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                fetchServices();
+            }, 350);
+        });
+
+        // ড্রপডাউন সিলেক্ট করলেই স্বয়ংক্রিয়ভাবে ফিল্টার লোড
+        autoTriggers.forEach(input => {
+            input.addEventListener('change', function () {
+                fetchServices();
+            });
+        });
+
+        // ফিল্টার রিসেট বাটন
+        resetBtn.addEventListener('click', function () {
+            form.reset();
+            fetchServices();
+        });
+
+        // পেজিনেশন লিঙ্কগুলোতে ক্লিক করলে পেজ রিফ্রেশ ছাড়া লোড
+        function attachPaginationEvents() {
+            const paginationLinks = tableContainer.querySelectorAll('#ajaxPaginationWrapper a');
+            paginationLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const href = this.getAttribute('href');
+                    if (href) {
+                        fetchServices(href);
+                    }
+                });
+            });
+        }
+
+        attachPaginationEvents();
+    });
+</script>
+@endpush

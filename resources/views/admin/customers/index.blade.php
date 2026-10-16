@@ -48,34 +48,29 @@
 <div class="row">
     <div class="col-12">
         <div class="premium-card mb-4">
-            <!-- Filter & Search Bar -->
+            <!-- Filter & Search Bar (AJAX) -->
             <div class="p-4 border-bottom border-secondary border-opacity-10">
-                <form action="{{ route('admin.customers.index') }}" method="GET">
+                <form id="customerFilterForm" onsubmit="return false;">
                     <div class="row g-3 align-items-center">
                         <div class="col-md-6">
                             <div class="input-group">
-                                <span class="input-group-text filter-input border-end-0"><i class="bi bi-search text-muted"></i></span>
-                                <input type="text" name="search" class="form-control filter-input border-start-0" placeholder="Search by client name or phone..." value="{{ request('search') }}">
+                                <input type="text" id="liveSearchInput" name="search" class="form-control filter-input border-start-0" placeholder="Search by client name or phone..." value="{{ request('search') }}">
                             </div>
                         </div>
 
                         <div class="col-md-4">
-                            <select name="sort" class="form-select filter-input">
+                            <select name="sort" class="form-select filter-input auto-trigger">
                                 <option value="">Sort: Newest First</option>
                                 <option value="spent_desc" {{ request('sort') === 'spent_desc' ? 'selected' : '' }}>Highest Total Spent</option>
                                 <option value="visits_desc" {{ request('sort') === 'visits_desc' ? 'selected' : '' }}>Most Visits</option>
                             </select>
                         </div>
 
-                        <div class="col-md-2 d-flex gap-2">
-                            <button type="submit" class="btn btn-primary w-100 py-2 rounded-3 fw-semibold">
-                                <i class="bi bi-funnel me-1"></i> Filter
+                        <div class="col-md-2 d-flex justify-content-end align-items-center gap-2">
+                            <div id="loadingSpinner" class="spinner-border spinner-border-sm text-warning d-none" role="status"></div>
+                            <button type="button" id="resetBtn" class="btn btn-outline-secondary w-100 py-2 rounded-3 fw-semibold" title="Reset Filters">
+                                <i class="bi bi-arrow-clockwise me-1"></i> Reset
                             </button>
-                            @if(request()->hasAny(['search', 'sort']))
-                                <a href="{{ route('admin.customers.index') }}" class="btn btn-outline-secondary px-3 py-2 rounded-3" title="Reset Filters">
-                                    <i class="bi bi-arrow-clockwise"></i>
-                                </a>
-                            @endif
                         </div>
                     </div>
                 </form>
@@ -89,8 +84,9 @@
                 </div>
             </div>
 
-            <!-- Client Table -->
-            <div class="table-responsive">
+            <!-- Client Table Container for AJAX -->
+            <div class="table-responsive" id="customerTableContainer">
+                @section('table_content')
                 <table class="table premium-table align-middle">
                     <thead>
                         <tr>
@@ -106,7 +102,7 @@
                         @forelse($customers as $customer)
                         <tr>
                             <td class="ps-4 text-muted fw-semibold">
-                                {{ $loop->iteration + ($customers->currentPage() - 1) * $customers->perPage() }}
+                                {{ $loop->iteration + ($customers->currentPage() - 1) *$customers->perPage() }}
                             </td>
                             <td>
                                 <div class="fw-bold text-light fs-6">{{ $customer->name ?? 'Walk-in Client' }}</div>
@@ -117,7 +113,7 @@
                             </td>
                             <td class="text-center">
                                 <span class="badge-services fs-6 px-3 py-1">
-                                    {{ $customer->total_visits }} {{ Str::plural('visit', $customer->total_visits) }}
+                                    {{ $customer->total_visits }} {{ Str::plural('visit',$customer->total_visits) }}
                                 </span>
                             </td>
                             <td class="text-end">
@@ -156,7 +152,7 @@
                                                 @foreach($customer->serviceEntries as $entry)
                                                 <tr class="border-bottom border-secondary border-opacity-10">
                                                     <td class="text-muted font-monospace">
-                                                        {{ $entry->entry_date }} ({{ $entry->created_at->format('h:i A') }})
+                                                        {{ $entry->entry_date ? \Carbon\Carbon::parse($entry->entry_date)->format('d M, Y') : '' }} ({{ $entry->created_at ? $entry->created_at->format('h:i A') : '' }})
                                                     </td>
                                                     <td>
                                                         <span class="badge bg-light bg-opacity-10 text-light border border-secondary border-opacity-25">
@@ -170,7 +166,7 @@
                                                             </span>
                                                         @endforeach
                                                     </td>
-                                                    <td class="text-end fw-bold text-success">
+                                                    <td class="text-end fw-bold text-success font-monospace">
                                                         AED {{ number_format($entry->total_amount, 2) }}
                                                     </td>
                                                 </tr>
@@ -187,20 +183,96 @@
                         <tr>
                             <td colspan="6" class="text-center py-5 text-muted">
                                 <i class="bi bi-person-x fs-1 d-block mb-2 text-secondary"></i>
-                                No client records found.
+                                No client records found matching the query.
                             </td>
                         </tr>
                         @endforelse
                     </tbody>
                 </table>
-            </div>
 
-            @if($customers->hasPages())
-                <div class="p-3 border-top border-secondary border-opacity-10 d-flex justify-content-end">
-                    {{ $customers->links() }}
-                </div>
-            @endif
+                @if($customers->hasPages())
+                    <div class="p-3 border-top border-secondary border-opacity-10 d-flex justify-content-end" id="ajaxPaginationWrapper">
+                        {{ $customers->links('pagination::bootstrap-5') }}
+                    </div>
+                @endif
+                @show
+            </div>
         </div>
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('customerFilterForm');
+        const searchInput = document.getElementById('liveSearchInput');
+        const autoTriggers = document.querySelectorAll('.auto-trigger');
+        const resetBtn = document.getElementById('resetBtn');
+        const tableContainer = document.getElementById('customerTableContainer');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+
+        let debounceTimer;
+
+        function fetchCustomers(url = "{{ route('admin.customers.index') }}") {
+            loadingSpinner.classList.remove('d-none');
+
+            const formData = new FormData(form);
+            const params = new URLSearchParams(formData);
+            const targetUrl = url.includes('?') ? `${url}&${params.toString()}` : `${url}?${params.toString()}`;
+
+            fetch(targetUrl, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                tableContainer.innerHTML = data.table;
+                attachPaginationEvents();
+            })
+            .catch(err => console.error("AJAX Error:", err))
+            .finally(() => {
+                loadingSpinner.classList.add('d-none');
+            });
+        }
+
+        // কী-বোর্ডে টাইপ করার সাথে সাথে লাইভ সার্চ (350ms Debounced)
+        searchInput.addEventListener('input', function () {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                fetchCustomers();
+            }, 350);
+        });
+
+        // সর্ট অপশন পরিবর্তনের সাথে সাথে অটো লোড
+        autoTriggers.forEach(input => {
+            input.addEventListener('change', function () {
+                fetchCustomers();
+            });
+        });
+
+        // রিসেট বাটন
+        resetBtn.addEventListener('click', function () {
+            form.reset();
+            fetchCustomers();
+        });
+
+        // পেজিনেশন লিঙ্ক ক্লিকে পেজ রিলোড ছাড়া লোড
+        function attachPaginationEvents() {
+            const paginationLinks = tableContainer.querySelectorAll('#ajaxPaginationWrapper a');
+            paginationLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const href = this.getAttribute('href');
+                    if (href) {
+                        fetchCustomers(href);
+                    }
+                });
+            });
+        }
+
+        attachPaginationEvents();
+    });
+</script>
+@endpush

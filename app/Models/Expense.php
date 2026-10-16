@@ -28,7 +28,13 @@ class Expense extends Model
         return $this->belongsTo(ExpenseCategory::class, 'expense_category_id');
     }
 
-    // Ei relationship-ti missing chilo, eta add koro:
+    // ExpenseController এবং Blade ভিউতে এই নাম খোঁজা হচ্ছে:
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    // LedgerController এর জন্য এটিও রাখা ভালো:
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');

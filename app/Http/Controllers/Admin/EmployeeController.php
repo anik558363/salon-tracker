@@ -20,7 +20,7 @@ class EmployeeController extends Controller
 
         // Search by Name or Email
         if ($request->filled('search')) {
-            $searchTerm = $request->search;
+            $searchTerm = trim($request->search);
             $query->where(function ($q) use ($searchTerm) {
                 $q->where('name', 'like', '%' . $searchTerm . '%')
                   ->orWhere('email', 'like', '%' . $searchTerm . '%');
@@ -32,9 +32,28 @@ class EmployeeController extends Controller
             $query->where('status', (bool) $request->status);
         }
 
+        // ফিল্টারের ওপর ভিত্তি করে স্ট্যাট কার্ডের কাউন্ট
+        $totalStaffCount    = (clone $query)->count();
+        $activeStaffCount   = (clone $query)->where('status', true)->count();
+        $inactiveStaffCount = (clone $query)->where('status', false)->count();
+
         $employees = $query->latest()->paginate(10)->withQueryString();
 
-        return view('admin.employees.index', compact('employees'));
+        if ($request->ajax()) {
+            return response()->json([
+                'table'         => view('admin.employees.index', compact('employees'))->renderSections()['table_content'] ?? '',
+                'totalStaff'    => number_format($totalStaffCount),
+                'activeStaff'   => number_format($activeStaffCount),
+                'inactiveStaff' => number_format($inactiveStaffCount),
+            ]);
+        }
+
+        return view('admin.employees.index', compact(
+            'employees',
+            'totalStaffCount',
+            'activeStaffCount',
+            'inactiveStaffCount'
+        ));
     }
 
     public function create()
@@ -70,7 +89,6 @@ class EmployeeController extends Controller
 
         $employee->assignRole('employee');
 
-        // ক্রিয়েট করার পর সরাসরি স্টাফ লিস্ট পেজে পাঠাবে
         return redirect()->route('admin.employees.index')->with('success', 'Staff member added successfully!');
     }
 
@@ -112,7 +130,6 @@ class EmployeeController extends Controller
 
         $employee->update($data);
 
-        // এডিট/আপডেট করার পর সরাসরি স্টাফ লিস্ট পেজে পাঠাবে
         return redirect()->route('admin.employees.index')->with('success', 'Staff details updated successfully!');
     }
 

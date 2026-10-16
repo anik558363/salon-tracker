@@ -11,10 +11,13 @@ class ServiceController extends Controller
 {
     public function index(Request $request)
     {
-        $services = Service::query()
+        $query = Service::query()
             ->when($request->filled('search'), function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%')
-                    ->orWhere('description', 'like', '%' . $request->search . '%');
+                $search = trim($request->search);
+                $q->where(function ($sub) use ($search) {
+                    $sub->where('name', 'like', '%' . $search . '%')
+                        ->orWhere('description', 'like', '%' . $search . '%');
+                });
             })
             ->when($request->filled('status'), function ($q) use ($request) {
                 $q->where('status', (bool) $request->status);
@@ -27,11 +30,30 @@ class ServiceController extends Controller
                 }
             }, function ($q) {
                 $q->latest();
-            })
-            ->paginate(10)
-            ->withQueryString();
+            });
 
-        return view('admin.services.index', compact('services'));
+        // ফিল্টারের ওপর ভিত্তি করে স্ট্যাট কার্ডের হিসাব
+        $totalServicesCount  = (clone $query)->count();
+        $activeServicesCount = (clone $query)->where('status', true)->count();
+        $averagePrice        = (clone $query)->avg('price') ?? 0;
+
+        $services = $query->paginate(10)->withQueryString();
+
+        if ($request->ajax()) {
+            return response()->json([
+                'table'          => view('admin.services.index', compact('services'))->renderSections()['table_content'] ?? '',
+                'totalServices'  => number_format($totalServicesCount),
+                'activeServices' => number_format($activeServicesCount),
+                'averagePrice'   => 'AED ' . number_format($averagePrice, 2),
+            ]);
+        }
+
+        return view('admin.services.index', compact(
+            'services',
+            'totalServicesCount',
+            'activeServicesCount',
+            'averagePrice'
+        ));
     }
 
     public function create()
@@ -61,8 +83,7 @@ class ServiceController extends Controller
             'status'      => true,
         ]);
 
-        // Diretso itong babalik sa index view listahan pagkatapos mag-create
-        return redirect()->route('admin.services.index')->with('success', 'Matagumpay na naidagdag ang serbisyo!');
+        return redirect()->route('admin.services.index')->with('success', 'Service added successfully!');
     }
 
     public function edit(Service $service)
@@ -96,8 +117,7 @@ class ServiceController extends Controller
 
         $service->update($data);
 
-        // Diretso itong babalik sa index view listahan pagkatapos mag-edit/update
-        return redirect()->route('admin.services.index')->with('success', 'Matagumpay na na-update ang serbisyo!');
+        return redirect()->route('admin.services.index')->with('success', 'Service updated successfully!');
     }
 
     public function toggleStatus(Service $service)
@@ -106,7 +126,7 @@ class ServiceController extends Controller
             'status' => !$service->status,
         ]);
 
-        return redirect()->route('admin.services.index')->with('success', 'Na-update ang estado ng serbisyo!');
+        return redirect()->route('admin.services.index')->with('success', 'Service status updated successfully!');
     }
 
     public function destroy(Service $service)
@@ -117,6 +137,6 @@ class ServiceController extends Controller
 
         $service->delete();
 
-        return redirect()->route('admin.services.index')->with('success', 'Matagumpay na naalis ang serbisyo!');
+        return redirect()->route('admin.services.index')->with('success', 'Service removed successfully!');
     }
 }

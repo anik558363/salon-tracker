@@ -13,7 +13,7 @@
             </div>
             <div>
                 <span class="text-muted small text-uppercase fw-semibold">Total Expenses (Filtered)</span>
-                <h4 class="mb-0 fw-bold text-danger">AED {{ number_format($totalExpense, 2) }}</h4>
+                <h4 class="mb-0 fw-bold text-danger font-monospace" id="metricTotalExpense">AED {{ number_format($totalExpense, 2) }}</h4>
             </div>
         </div>
     </div>
@@ -29,16 +29,21 @@
         @endif
 
         <div class="premium-card mb-4">
-            <!-- Filter Section -->
+            <!-- Filter Section (AJAX) -->
             <div class="p-4 border-bottom border-secondary border-opacity-10">
-                <form action="{{ route('admin.expenses.index') }}" method="GET">
-                    <div class="row g-3 align-items-center">
+                <form id="expenseFilterForm" onsubmit="return false;">
+                    <div class="row g-3 align-items-end">
                         <div class="col-lg-4 col-md-6">
-                            <input type="text" name="search" class="form-control filter-input" placeholder="Search title or note..." value="{{ request('search') }}">
+                            <label class="form-label text-muted small fw-semibold">Search Title or Note</label>
+                            <div class="input-group">
+                               
+                                <input type="text" id="liveSearchInput" name="search" class="form-control filter-input" placeholder="Type title or note..." value="{{ request('search') }}">
+                            </div>
                         </div>
 
                         <div class="col-lg-3 col-md-3">
-                            <select name="category_id" class="form-select filter-input">
+                            <label class="form-label text-muted small fw-semibold">Category</label>
+                            <select name="category_id" class="form-select filter-input auto-trigger">
                                 <option value="">All Categories</option>
                                 @foreach($categories as $category)
                                     <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
@@ -49,18 +54,15 @@
                         </div>
 
                         <div class="col-lg-3 col-md-3">
-                            <input type="date" name="date" class="form-control filter-input" value="{{ request('date') }}">
+                            <label class="form-label text-muted small fw-semibold">Expense Date</label>
+                            <input type="date" name="date" class="form-control filter-input auto-trigger" value="{{ request('date') }}">
                         </div>
 
-                        <div class="col-lg-2 col-md-12 d-flex gap-2">
-                            <button type="submit" class="btn btn-primary w-100 py-2 rounded-3 fw-semibold">
-                                <i class="bi bi-funnel me-1"></i> Filter
+                        <div class="col-lg-2 col-md-12 d-flex justify-content-end gap-2 mt-2">
+                            <div id="loadingSpinner" class="spinner-border spinner-border-sm text-warning me-2 d-none" role="status"></div>
+                            <button type="button" id="resetBtn" class="btn btn-outline-secondary w-100 py-2 rounded-3 fw-semibold" title="Clear Filters">
+                                <i class="bi bi-arrow-clockwise me-1"></i> Reset
                             </button>
-                            @if(request()->hasAny(['search', 'category_id', 'date']))
-                                <a href="{{ route('admin.expenses.index') }}" class="btn btn-outline-secondary px-3 py-2 rounded-3" title="Clear Filters">
-                                    <i class="bi bi-arrow-clockwise"></i>
-                                </a>
-                            @endif
                         </div>
                     </div>
                 </form>
@@ -82,8 +84,9 @@
                 </div>
             </div>
 
-            <!-- Expenses Table -->
-            <div class="table-responsive">
+            <!-- Expenses Table Container for AJAX -->
+            <div class="table-responsive" id="expenseTableContainer">
+                @section('table_content')
                 <table class="table premium-table align-middle">
                     <thead>
                         <tr>
@@ -99,7 +102,9 @@
                     <tbody>
                         @forelse($expenses as $expense)
                         <tr>
-                            <td class="ps-4 text-muted fw-semibold">{{ $loop->iteration + ($expenses->currentPage() - 1) * $expenses->perPage() }}</td>
+                            <td class="ps-4 text-muted fw-semibold">
+                                {{ $loop->iteration + ($expenses->currentPage() - 1) *$expenses->perPage() }}
+                            </td>
                             <td>
                                 <div class="fw-bold text-light fs-6">{{ $expense->name }}</div>
                                 @if($expense->note)
@@ -140,20 +145,100 @@
                         @empty
                         <tr>
                             <td colspan="7" class="text-center py-5 text-muted">
-                                <i class="bi bi-inbox fs-2 d-block mb-1 text-secondary"></i> No expense records found.
+                                <i class="bi bi-inbox fs-2 d-block mb-1 text-secondary"></i> No expense records found matching criteria.
                             </td>
                         </tr>
                         @endforelse
                     </tbody>
                 </table>
-            </div>
 
-            @if($expenses->hasPages())
-                <div class="p-3 border-top border-secondary border-opacity-10 d-flex justify-content-end">
-                    {{ $expenses->links('pagination::bootstrap-5') }}
-                </div>
-            @endif
+                @if($expenses->hasPages())
+                    <div class="p-3 border-top border-secondary border-opacity-10 d-flex justify-content-end" id="ajaxPaginationWrapper">
+                        {{ $expenses->links('pagination::bootstrap-5') }}
+                    </div>
+                @endif
+                @show
+            </div>
         </div>
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('expenseFilterForm');
+        const searchInput = document.getElementById('liveSearchInput');
+        const autoTriggers = document.querySelectorAll('.auto-trigger');
+        const resetBtn = document.getElementById('resetBtn');
+        const tableContainer = document.getElementById('expenseTableContainer');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const metricTotal = document.getElementById('metricTotalExpense');
+
+        let debounceTimer;
+
+        function fetchExpenses(url = "{{ route('admin.expenses.index') }}") {
+            loadingSpinner.classList.remove('d-none');
+
+            const formData = new FormData(form);
+            const params = new URLSearchParams(formData);
+            const targetUrl = url.includes('?') ? `${url}&${params.toString()}` : `${url}?${params.toString()}`;
+
+            fetch(targetUrl, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                tableContainer.innerHTML = data.table;
+                if (metricTotal && data.totalExpense) {
+                    metricTotal.textContent = data.totalExpense;
+                }
+                attachPaginationEvents();
+            })
+            .catch(err => console.error("AJAX Error:", err))
+            .finally(() => {
+                loadingSpinner.classList.add('d-none');
+            });
+        }
+
+        // কী-বোর্ডে টাইপ করার সাথে সাথে লাইভ সার্চ (350ms debounce)
+        searchInput.addEventListener('input', function () {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                fetchExpenses();
+            }, 350);
+        });
+
+        // ক্যাটাগরি বা ডেট পরিবর্তনের সাথে সাথে অটো লোড
+        autoTriggers.forEach(input => {
+            input.addEventListener('change', function () {
+                fetchExpenses();
+            });
+        });
+
+        // ফিল্টার রিসেট বাটন
+        resetBtn.addEventListener('click', function () {
+            form.reset();
+            fetchExpenses();
+        });
+
+        // পেজিনেশন লিঙ্কগুলোতে ক্লিক করলে পেজ রিলোড ছাড়া লোড
+        function attachPaginationEvents() {
+            const paginationLinks = tableContainer.querySelectorAll('#ajaxPaginationWrapper a');
+            paginationLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const href = this.getAttribute('href');
+                    if (href) {
+                        fetchExpenses(href);
+                    }
+                });
+            });
+        }
+
+        attachPaginationEvents();
+    });
+</script>
+@endpush

@@ -13,28 +13,35 @@ class ExpenseController extends Controller
     {
         $categories = ExpenseCategory::orderBy('name')->get();
 
-        $expenses = Expense::with(['category', 'creator'])
+        $query = Expense::with(['category', 'creator'])
             ->when($request->filled('search'), function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%')
-                  ->orWhere('note', 'like', '%' . $request->search . '%');
+                $search = trim($request->search);
+                $q->where(function ($sub) use ($search) {
+                    $sub->where('name', 'like', '%' . $search . '%')
+                        ->orWhere('note', 'like', '%' . $search . '%');
+                });
             })
             ->when($request->filled('category_id'), function ($q) use ($request) {
                 $q->where('expense_category_id', $request->category_id);
             })
             ->when($request->filled('date'), function ($q) use ($request) {
                 $q->whereDate('expense_date', $request->date);
-            })
-            ->latest('expense_date')
+            });
+
+        // মোট খরচের হিসাব (একই ফিল্টারের ওপর ভিত্তি করে)
+        $totalExpense = (clone $query)->sum('amount');
+
+        $expenses = $query->latest('expense_date')
+            ->latest('id')
             ->paginate(10)
             ->withQueryString();
 
-        $totalExpense = Expense::when($request->filled('category_id'), function ($q) use ($request) {
-                $q->where('expense_category_id', $request->category_id);
-            })
-            ->when($request->filled('date'), function ($q) use ($request) {
-                $q->whereDate('expense_date', $request->date);
-            })
-            ->sum('amount');
+        if ($request->ajax()) {
+            return response()->json([
+                'table'        => view('admin.expenses.index', compact('expenses', 'categories', 'totalExpense'))->renderSections()['table_content'] ?? '',
+                'totalExpense' => 'AED ' . number_format($totalExpense, 2),
+            ]);
+        }
 
         return view('admin.expenses.index', compact('expenses', 'categories', 'totalExpense'));
     }
@@ -61,7 +68,7 @@ class ExpenseController extends Controller
             'amount'              => $request->amount,
             'expense_date'        => $request->expense_date,
             'note'                => $request->note,
-            'user_id'             => auth()->id(), // স্বয়ংক্রিয়ভাবে লগইন করা অ্যাডমিনের আইডি সেভ হবে
+            'user_id'             => auth()->id(),
         ]);
 
         return redirect()->route('admin.expenses.index')->with('success', 'Expense recorded successfully!');

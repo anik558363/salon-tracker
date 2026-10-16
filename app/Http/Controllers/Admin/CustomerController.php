@@ -15,16 +15,16 @@ class CustomerController extends Controller
             ->withCount('serviceEntries as total_visits')
             ->withSum('serviceEntries as total_spent', 'total_amount');
 
-        // Paghahanap gamit ang Pangalan o Numero ng Telepono
+        // লাইভ সার্চ (নাম অথবা ফোন নম্বর)
         if ($request->filled('search')) {
-            $searchTerm = $request->search;
+            $searchTerm = trim($request->search);
             $query->where(function ($q) use ($searchTerm) {
                 $q->where('name', 'like', '%' . $searchTerm . '%')
                   ->orWhere('phone', 'like', '%' . $searchTerm . '%');
             });
         }
 
-        // Pagsasaayos (Sort)
+        // সর্টিং লজিক
         if ($request->get('sort') === 'spent_desc') {
             $query->orderByDesc('total_spent');
         } elseif ($request->get('sort') === 'visits_desc') {
@@ -34,6 +34,12 @@ class CustomerController extends Controller
         }
 
         $customers = $query->paginate(15)->withQueryString();
+
+        if ($request->ajax()) {
+            return response()->json([
+                'table' => view('admin.customers.index', compact('customers'))->renderSections()['table_content'] ?? '',
+            ]);
+        }
 
         return view('admin.customers.index', compact('customers'));
     }

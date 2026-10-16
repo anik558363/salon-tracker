@@ -12,13 +12,20 @@ class ExpenseCategoryController extends Controller
     {
         $categories = ExpenseCategory::query()
             ->when($request->filled('search'), function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%')
-                  ->orWhere('description', 'like', '%' . $request->search . '%');
+                $search = trim($request->search);
+                $q->where('name', 'like', '%' . $search . '%')
+                  ->orWhere('description', 'like', '%' . $search . '%');
             })
             ->withCount('expenses')
             ->latest()
             ->paginate(10)
             ->withQueryString();
+
+        if ($request->ajax()) {
+            return response()->json([
+                'table' => view('admin.expenses.categories.index', compact('categories'))->renderSections()['table_content'] ?? '',
+            ]);
+        }
 
         return view('admin.expenses.categories.index', compact('categories'));
     }

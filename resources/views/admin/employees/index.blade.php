@@ -13,7 +13,7 @@
             </div>
             <div>
                 <span class="text-muted small text-uppercase fw-semibold">Total Staff</span>
-                <h4 class="mb-0 fw-bold text-light">{{ \App\Models\User::role('employee')->count() }}</h4>
+                <h4 class="mb-0 fw-bold text-light font-monospace" id="metricTotalStaff">{{ $totalStaffCount ?? \App\Models\User::role('employee')->count() }}</h4>
             </div>
         </div>
     </div>
@@ -24,7 +24,7 @@
             </div>
             <div>
                 <span class="text-muted small text-uppercase fw-semibold">Active Staff</span>
-                <h4 class="mb-0 fw-bold text-light">{{ \App\Models\User::role('employee')->where('status', true)->count() }}</h4>
+                <h4 class="mb-0 fw-bold text-light font-monospace" id="metricActiveStaff">{{ $activeStaffCount ?? \App\Models\User::role('employee')->where('status', true)->count() }}</h4>
             </div>
         </div>
     </div>
@@ -35,7 +35,7 @@
             </div>
             <div>
                 <span class="text-muted small text-uppercase fw-semibold">Inactive Staff</span>
-                <h4 class="mb-0 fw-bold text-light">{{ \App\Models\User::role('employee')->where('status', false)->count() }}</h4>
+                <h4 class="mb-0 fw-bold text-light font-monospace" id="metricInactiveStaff">{{ $inactiveStaffCount ?? \App\Models\User::role('employee')->where('status', false)->count() }}</h4>
             </div>
         </div>
     </div>
@@ -51,33 +51,32 @@
         @endif
 
         <div class="premium-card mb-4">
-            <!-- Filter & Search Section -->
+            <!-- Filter & Search Section (AJAX) -->
             <div class="p-4 border-bottom border-secondary border-opacity-10">
-                <form action="{{ route('admin.employees.index') }}" method="GET">
+                <form id="employeeFilterForm" onsubmit="return false;">
                     <div class="row g-3 align-items-center">
                         <div class="col-lg-6 col-md-6">
                             <div class="input-group">
-                                <input type="text" name="search" class="form-control filter-input border-start-0" placeholder="Search by staff name or email..." value="{{ request('search') }}">
+                                <span class="input-group-text bg-dark border-secondary border-opacity-25 text-muted">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input type="text" id="liveSearchInput" name="search" class="form-control filter-input" placeholder="Search by staff name or email..." value="{{ request('search') }}">
                             </div>
                         </div>
 
-                        <div class="col-lg-4 col-md-3">
-                            <select name="status" class="form-select filter-input">
+                        <div class="col-lg-4 col-md-4">
+                            <select name="status" class="form-select filter-input auto-trigger">
                                 <option value="">Filter by Status (All)</option>
                                 <option value="1" {{ request('status') === '1' ? 'selected' : '' }}>Active Only</option>
                                 <option value="0" {{ request('status') === '0' ? 'selected' : '' }}>Inactive Only</option>
                             </select>
                         </div>
 
-                        <div class="col-lg-2 col-md-3 d-flex gap-2">
-                            <button type="submit" class="btn btn-primary w-100 py-2 rounded-3 fw-semibold">
-                                <i class="bi bi-funnel me-1"></i> Filter
+                        <div class="col-lg-2 col-md-2 d-flex justify-content-end align-items-center gap-2">
+                            <div id="loadingSpinner" class="spinner-border spinner-border-sm text-warning d-none" role="status"></div>
+                            <button type="button" id="resetBtn" class="btn btn-outline-secondary w-100 py-2 rounded-3 fw-semibold" title="Reset Filters">
+                                <i class="bi bi-arrow-clockwise me-1"></i> Reset
                             </button>
-                            @if(request()->hasAny(['search', 'status']))
-                                <a href="{{ route('admin.employees.index') }}" class="btn btn-outline-secondary px-3 py-2 rounded-3" title="Clear Filter">
-                                    <i class="bi bi-arrow-clockwise"></i>
-                                </a>
-                            @endif
                         </div>
                     </div>
                 </form>
@@ -94,8 +93,9 @@
                 </a>
             </div>
 
-            <!-- Table -->
-            <div class="table-responsive">
+            <!-- Table Container for AJAX -->
+            <div class="table-responsive" id="employeeTableContainer">
+                @section('table_content')
                 <table class="table premium-table align-middle">
                     <thead>
                         <tr>
@@ -111,7 +111,7 @@
                     <tbody>
                         @forelse($employees as $employee)
                         <tr>
-                            <td class="ps-4 text-muted fw-semibold">{{ $loop->iteration + ($employees->currentPage() - 1) * $employees->perPage() }}</td>
+                            <td class="ps-4 text-muted fw-semibold">{{ $loop->iteration + ($employees->currentPage() - 1) *$employees->perPage() }}</td>
                             <td>
                                 @if($employee->photo)
                                     <img src="{{ asset('storage/' . $employee->photo) }}" alt="{{ $employee->name }}" class="rounded-circle border border-secondary border-opacity-25 object-fit-cover" style="width: 44px; height: 44px;">
@@ -165,24 +165,109 @@
                         <tr>
                             <td colspan="7" class="text-center py-5 text-muted">
                                 <i class="bi bi-people fs-1 d-block mb-2 text-secondary"></i>
-                                @if(request('search'))
-                                    No staff member matching "<strong>{{ request('search') }}</strong>".
-                                @else
-                                    No staff records found in database.
-                                @endif
+                                No staff records found matching criteria.
                             </td>
                         </tr>
                         @endforelse
                     </tbody>
                 </table>
-            </div>
 
-            @if($employees->hasPages())
-                <div class="p-3 border-top border-secondary border-opacity-10 d-flex justify-content-end">
-                    {{ $employees->links() }}
-                </div>
-            @endif
+                @if($employees->hasPages())
+                    <div class="p-3 border-top border-secondary border-opacity-10 d-flex justify-content-end" id="ajaxPaginationWrapper">
+                        {{ $employees->links('pagination::bootstrap-5') }}
+                    </div>
+                @endif
+                @show
+            </div>
         </div>
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('employeeFilterForm');
+        const searchInput = document.getElementById('liveSearchInput');
+        const autoTriggers = document.querySelectorAll('.auto-trigger');
+        const resetBtn = document.getElementById('resetBtn');
+        const tableContainer = document.getElementById('employeeTableContainer');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+
+        const metricTotal = document.getElementById('metricTotalStaff');
+        const metricActive = document.getElementById('metricActiveStaff');
+        const metricInactive = document.getElementById('metricInactiveStaff');
+
+        let debounceTimer;
+
+        function fetchEmployees(url = "{{ route('admin.employees.index') }}") {
+            loadingSpinner.classList.remove('d-none');
+
+            const formData = new FormData(form);
+            const params = new URLSearchParams(formData);
+            const targetUrl = url.includes('?') ? `${url}&${params.toString()}` : `${url}?${params.toString()}`;
+
+            fetch(targetUrl, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                tableContainer.innerHTML = data.table;
+                if (metricTotal && data.totalStaff) {
+                    metricTotal.textContent = data.totalStaff;
+                }
+                if (metricActive && data.activeStaff) {
+                    metricActive.textContent = data.activeStaff;
+                }
+                if (metricInactive && data.inactiveStaff) {
+                    metricInactive.textContent = data.inactiveStaff;
+                }
+                attachPaginationEvents();
+            })
+            .catch(err => console.error("AJAX Error:", err))
+            .finally(() => {
+                loadingSpinner.classList.add('d-none');
+            });
+        }
+
+        // কী-বোর্ডে টাইপ করার সাথে সাথে লাইভ সার্চ (350ms Debounced)
+        searchInput.addEventListener('input', function () {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                fetchEmployees();
+            }, 350);
+        });
+
+        // স্ট্যাটাস ড্রপডাউন সিলেক্ট করলেই সাথে সাথে অটো লোড
+        autoTriggers.forEach(input => {
+            input.addEventListener('change', function () {
+                fetchEmployees();
+            });
+        });
+
+        // ফিল্টার রিসেট বাটন
+        resetBtn.addEventListener('click', function () {
+            form.reset();
+            fetchEmployees();
+        });
+
+        // পেজিনেশন লিঙ্কগুলোতে ক্লিক করলে পেজ রিফ্রেশ ছাড়া লোড
+        function attachPaginationEvents() {
+            const paginationLinks = tableContainer.querySelectorAll('#ajaxPaginationWrapper a');
+            paginationLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const href = this.getAttribute('href');
+                    if (href) {
+                        fetchEmployees(href);
+                    }
+                });
+            });
+        }
+
+        attachPaginationEvents();
+    });
+</script>
+@endpush
