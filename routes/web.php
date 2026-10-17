@@ -18,6 +18,8 @@ use App\Models\User;
 use App\Http\Controllers\Admin\FinancialLedgerController;
 use App\Http\Controllers\Admin\IncomeReportController;
 
+use App\Http\Controllers\Admin\SettingController;
+
 
 // পাবলিক হোমপেজ
 Route::get('/', function () {
@@ -81,7 +83,7 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/settings/password', [ProfileSettingsController::class, 'updatePassword'])->name('settings.password.update');
 
 
-Route::get('/reports/income-statement', [IncomeReportController::class, 'index'])->name('reports.income');
+        Route::get('/reports/income-statement', [IncomeReportController::class, 'index'])->name('reports.income');
 
 
         Route::get('/reports/financial-ledger', [FinancialLedgerController::class, 'index'])->name('reports.financial-ledger');
@@ -90,6 +92,9 @@ Route::get('/reports/income-statement', [IncomeReportController::class, 'index']
         Route::get('/reports/employee-performance', [EmployeeReportController::class, 'index'])->name('reports.employee');
         Route::get('/reports/employee-performance', [EmployeeReportController::class, 'index'])->name('reports.employee');
         Route::post('/reports/employee-salary-pay', [EmployeeReportController::class, 'paySalary'])->name('reports.employee.pay-salary');
+
+        Route::get('/genaral-settings', [SettingController::class, 'index'])->name('settings.index');
+        Route::post('/genaral-settings', [SettingController::class, 'update'])->name('settings.update');
     });
 
     // এমপ্লয়ি প্যানেল (ড্যাশবোর্ড ছাড়া, সরাসরি সার্ভিস এন্ট্রি ও প্রোফাইল সেটিংস)

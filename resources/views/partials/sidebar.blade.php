@@ -1,7 +1,13 @@
 <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
     <div class="sidebar-brand">
-        <a href="{{ route('dashboard') }}" class="brand-link">
-            <span class="brand-text fw-bold">💈 Salon Tracker</span>
+        <a href="{{ route('admin.dashboard') }}" class="brand-link d-flex align-items-center px-3 py-3">
+            @if (setting('logo'))
+                <img src="{{ asset('storage/' . setting('logo')) }}" alt="Logo" class="brand-image me-2"
+                    style="max-height: 35px;">
+            @else
+                <i class="bi bi-scissors text-warning fs-4 me-2"></i>
+            @endif
+            <span class="brand-text fw-bold text-white">{{ setting('salon_name', 'Luxury Salon') }}</span>
         </a>
     </div>
     <div class="sidebar-wrapper">
@@ -91,14 +97,26 @@
                         </a>
                     </li>
 
-                    <li class="nav-header text-uppercase text-muted fs-7">Settings</li>
-                    <li class="nav-item">
-                        <a href="{{ route('admin.settings.profile') }}"
-                            class="nav-link {{ request()->routeIs('admin.settings.profile') ? 'active' : '' }}">
-                            <i class="nav-icon bi bi-gear-fill"></i>
-                            <p>Profile & Security</p>
-                        </a>
-                    </li>
+
+<li class="nav-header text-uppercase text-muted fs-7">Settings</li>
+
+<li class="nav-item">
+    <a href="{{ route('admin.settings.profile') }}"
+        class="nav-link {{ request()->routeIs('admin.settings.profile') ? 'active' : '' }}">
+        <i class="nav-icon bi bi-shield-lock"></i>
+        <p>Profile & Security</p>
+    </a>
+</li>
+
+<li class="nav-item">
+    <a href="{{ route('admin.settings.index') }}"
+        class="nav-link {{ request()->routeIs('admin.settings.index') ? 'active' : '' }}">
+        <i class="nav-icon bi bi-gear-fill text-info"></i>
+        <p>Salon Settings</p>
+    </a>
+</li>
+
+
                 @endrole
 
                 @if (auth()->user()->hasRole('employee'))

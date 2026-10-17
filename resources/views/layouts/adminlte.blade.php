@@ -4,7 +4,12 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', 'Salon Tracker')</title>
+    
+    <title>@yield('title') - {{ setting('salon_name', 'Salon Management') }}</title>
+
+    @if (setting('favicon'))
+        <link rel="icon" type="image/x-icon" href="{{ asset('storage/' . setting('favicon')) }}">
+    @endif
 
     <!-- Google Font: Source Sans Pro -->
     <link rel="stylesheet"
@@ -12,13 +17,23 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-<!-- AdminLTE CSS -->
+    <!-- AdminLTE CSS -->
     <link rel="stylesheet" href="{{ asset('css/adminlte.min.css') }}">
 
     <!-- Custom Premium Salon Theme -->
     <link rel="stylesheet" href="{{ asset('css/custom-premium.css') }}">
 
     @stack('styles')
+
+    <style>
+        .text-muted {
+            color: #ffffff !important;
+        }
+
+        .nav-link {
+            color: #ffffff !important;
+        }
+    </style>
 </head>
 
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">

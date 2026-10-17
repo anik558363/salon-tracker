@@ -4,7 +4,12 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Luxe Salon & Lounge | Dubai, UAE</title>
+    <title>{{ setting('salon_name', 'Luxe Salon & Lounge') }} | Dubai, UAE</title>
+
+    <!-- Dynamic Browser Favicon -->
+    @if(setting('favicon'))
+        <link rel="icon" type="image/x-icon" href="{{ asset('storage/' . setting('favicon')) }}">
+    @endif
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -210,8 +215,12 @@
     <nav class="navbar navbar-expand-lg luxury-nav sticky-top">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center text-white fw-bold fs-4" href="{{ url('/') }}">
-                <span class="me-2 fs-3">💈</span> <span class="gold-text">LUXE SALON</span>&nbsp;<span
-                    class="text-white fw-light fs-6">DUBAI</span>
+                @if(setting('logo'))
+                    <img src="{{ asset('storage/' . setting('logo')) }}" alt="Logo" class="me-2" style="max-height: 40px; width: auto; object-fit: contain;">
+                @else
+                    <span class="me-2 fs-3">💈</span>
+                @endif
+                <span class="gold-text text-uppercase">{{ setting('salon_name', 'LUXE SALON') }}</span>
             </a>
 
             <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse"
@@ -255,33 +264,39 @@
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <header class="hero-section text-center">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-9">
-                    <div class="hero-badge">
-                        <i class="bi bi-stars"></i> Premium Grooming & Styling in Dubai
-                    </div>
-                    <h1 class="display-4 fw-bold text-white mb-4">
-                        Redefining Elegance, Luxury & Precision Grooming
-                    </h1>
-                    <p class="hero-subtitle mb-5 px-lg-5">
-                        Experience bespoke hair treatments, executive styling, and rejuvenation in the heart of the
-                        United Arab Emirates. Dedicated to perfection and timeless sophistication.
-                    </p>
-                    <div class="d-flex flex-wrap justify-content-center gap-3">
-                        <a href="#services" class="btn btn-gold px-4 py-3 fs-6">
-                            <i class="bi bi-scissors me-2"></i> View Rate Card
-                        </a>
-                        <a href="#contact" class="btn btn-outline-gold px-4 py-3 fs-6">
-                            <i class="bi bi-geo-alt me-2"></i> Visit Our Lounge
-                        </a>
-                    </div>
+   <!-- Hero Section -->
+<header class="hero-section text-center">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-9">
+                <!-- Dynamic Hero Badge -->
+                <div class="hero-badge">
+                    <i class="bi bi-stars"></i> {{ setting('hero_badge', 'Premium Grooming & Styling') }}
+                </div>
+
+                <!-- Dynamic Hero Main Title -->
+                <h1 class="display-4 fw-bold text-white mb-4">
+                    {{ setting('hero_title', 'Redefining Elegance, Luxury & Precision Grooming') }}
+                </h1>
+
+                <!-- Dynamic Hero Subtitle / Description -->
+                <p class="hero-subtitle mb-5 px-lg-5">
+                    {{ setting('hero_subtitle', 'Experience bespoke hair treatments, executive styling, and rejuvenation at ' . setting('salon_name', 'Luxe Salon') . '. Dedicated to perfection and timeless sophistication.') }}
+                </p>
+
+                <!-- Dynamic Action Buttons -->
+                <div class="d-flex flex-wrap justify-content-center gap-3">
+                    <a href="{{ setting('hero_btn1_link', '#services') }}" class="btn btn-gold px-4 py-3 fs-6">
+                        <i class="bi bi-scissors me-2"></i> {{ setting('hero_btn1_text', 'View Rate Card') }}
+                    </a>
+                    <a href="{{ setting('hero_btn2_link', '#contact') }}" class="btn btn-outline-gold px-4 py-3 fs-6">
+                        <i class="bi bi-geo-alt me-2"></i> {{ setting('hero_btn2_text', 'Visit Our Lounge') }}
+                    </a>
                 </div>
             </div>
         </div>
-    </header>
+    </div>
+</header>
 
     <!-- Features / Highlights -->
     <section id="about" class="py-5">
@@ -315,11 +330,9 @@
         </div>
     </section>
 
-
     <!-- Our Team / Master Stylists Section -->
     <section id="team" class="py-5">
         <div class="container py-4">
-            <!-- Pamagat ng Seksyon -->
             <div class="text-center mb-5">
                 <span class="text-uppercase gold-text fw-bold small tracking-wider">Meet the Artisans</span>
                 <h2 class="display-6 fw-bold text-white mt-1">Our Master Stylists</h2>
@@ -333,17 +346,16 @@
                     border-radius: 16px;
                     padding: 30px 24px;
                     text-align: center;
-                    /* transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; */
                     height: 100%;
                     display: flex;
                     flex-direction: column;
                     align-items: center;
+                    transition: transform 0.3s ease, border-color 0.3s ease;
                 }
 
                 .team-card:hover {
                     transform: translateY(-5px);
                     border-color: rgba(212, 175, 55, 0.4);
-                    /* box-shadow: 0 14px 35px rgba(0, 0, 0, 0.5); */
                 }
 
                 .stylist-avatar-wrapper {
@@ -406,12 +418,10 @@
                 }
             </style>
 
-            <!-- Talaan ng mga Stylist -->
             <div class="row g-4 justify-content-center">
                 @forelse($stylists as $stylist)
                     <div class="col-12 col-sm-6 col-lg-3">
                         <div class="team-card position-relative">
-                            <!-- Stylist Avatar -->
                             <div class="stylist-avatar-wrapper">
                                 @if ($stylist->photo)
                                     <img src="{{ asset('storage/' . $stylist->photo) }}" alt="{{ $stylist->name }}">
@@ -420,7 +430,6 @@
                                 @endif
                             </div>
 
-                            <!-- Stylist Info -->
                             <h4 class="stylist-name">{{ $stylist->name }}</h4>
                             <span class="stylist-title">{{ $stylist->title ?? 'Executive Stylist' }}</span>
 
@@ -428,7 +437,6 @@
                                 {{ str($stylist->bio ?? 'Specialist in precision cutting, beard sculpting, and executive hair treatments.')->limit(30) }}
                             </p>
 
-                            <!-- Action Button for Staff Access -->
                             <div class="mt-auto w-100 pt-2">
                                 @auth
                                     @if (auth()->id() === $stylist->id)
@@ -457,22 +465,18 @@
                     </div>
                 @endforelse
             </div>
-
-
         </div>
     </section>
 
     <!-- Services & Pricing Grid Section -->
     <section id="services" class="py-5" style="background: rgba(255, 255, 255, 0.015);">
         <div class="container py-4">
-            <!-- Section Header -->
             <div class="text-center mb-5">
                 <span class="text-uppercase gold-text fw-bold small tracking-wider">Our Menu</span>
                 <h2 class="display-6 fw-bold text-white mt-1">Signature Services & Rates</h2>
                 <p class="card-description">Transparent pricing curated for executive grooming</p>
             </div>
 
-            <!-- Custom Card Styles -->
             <style>
                 .service-premium-card {
                     background: #181b20;
@@ -556,12 +560,10 @@
                 }
             </style>
 
-            <!-- Services Grid -->
             <div class="row g-4">
                 @forelse($services as $service)
                     <div class="col-12 col-md-6 col-lg-4">
                         <div class="service-premium-card">
-                            <!-- Image Container -->
                             <div class="service-img-wrapper">
                                 @if ($service->image)
                                     <img src="{{ asset('storage/' . $service->image) }}" alt="{{ $service->name }}">
@@ -574,13 +576,12 @@
                                     </div>
                                 @endif
 
-                                <!-- Floating Price Tag -->
+                                <!-- Dynamic Currency Code from Setting -->
                                 <span class="service-price-floating">
-                                    AED {{ number_format($service->price, 2) }}
+                                    {{ setting('currency', 'AED') }} {{ number_format($service->price, 2) }}
                                 </span>
                             </div>
 
-                            <!-- Card Content -->
                             <div class="service-card-body">
                                 <h4 class="service-card-title">{{ $service->name }}</h4>
                                 <p class="service-card-desc">
@@ -613,20 +614,16 @@
     <section id="contact" class="py-5">
         <div class="container py-4">
             <div class="row g-4 justify-content-center">
+                <!-- Dynamic Operating Hours from Setting -->
                 <div class="col-lg-5">
                     <div class="feature-box">
-                        <h4 class="font-serif fw-bold text-white mb-3"><i
-                                class="bi bi-clock-history gold-text me-2"></i>Operating Hours</h4>
+                        <h4 class="font-serif fw-bold text-white mb-3">
+                            <i class="bi bi-clock-history gold-text me-2"></i>Operating Hours
+                        </h4>
                         <ul class="list-unstyled mb-0">
-                            <li
-                                class="d-flex justify-content-between py-2 border-bottom border-secondary border-opacity-10">
-                                <span class="timing-label">Saturday – Thursday:</span>
-                                <span class="text-white fw-semibold">10:00 AM – 10:00 PM</span>
-                            </li>
-                            <li
-                                class="d-flex justify-content-between py-2 border-bottom border-secondary border-opacity-10">
-                                <span class="timing-label">Friday:</span>
-                                <span class="text-white fw-semibold">01:30 PM – 11:00 PM</span>
+                            <li class="d-flex justify-content-between py-2 border-bottom border-secondary border-opacity-10">
+                                <span class="timing-label">Schedule:</span>
+                                <span class="text-white fw-semibold">{{ setting('opening_hours', 'Daily: 10:00 AM - 10:00 PM') }}</span>
                             </li>
                             <li class="d-flex justify-content-between py-2 pt-3">
                                 <span class="timing-label">Walk-in Policy:</span>
@@ -636,14 +633,24 @@
                     </div>
                 </div>
 
+                <!-- Dynamic Salon Location & Contact from Setting -->
                 <div class="col-lg-5">
                     <div class="feature-box">
-                        <h4 class="font-serif fw-bold text-white mb-3"><i
-                                class="bi bi-geo-alt-fill gold-text me-2"></i>Salon Location</h4>
-                        <p class="location-details mb-2">Downtown Boulevard, Dubai, United Arab Emirates</p>
-                        <p class="location-details mb-3"><i class="bi bi-telephone gold-text me-2"></i>+971 4 000 0000
+                        <h4 class="font-serif fw-bold text-white mb-3">
+                            <i class="bi bi-geo-alt-fill gold-text me-2"></i>Salon Location
+                        </h4>
+                        <p class="location-details mb-2">
+                            {{ setting('salon_address', 'Downtown Dubai, UAE') }}
                         </p>
-                        <a href="https://maps.google.com" target="_blank" class="btn btn-outline-gold btn-sm">
+                        <p class="location-details mb-2">
+                            <i class="bi bi-telephone gold-text me-2"></i>{{ setting('salon_phone', '+971 4 123 4567') }}
+                        </p>
+                        @if(setting('salon_email'))
+                            <p class="location-details mb-3">
+                                <i class="bi bi-envelope gold-text me-2"></i>{{ setting('salon_email') }}
+                            </p>
+                        @endif
+                        <a href="https://maps.google.com/?q={{ urlencode(setting('salon_address', 'Downtown Dubai, UAE')) }}" target="_blank" class="btn btn-outline-gold btn-sm">
                             <i class="bi bi-map me-1"></i> Open in Google Maps
                         </a>
                     </div>
@@ -656,7 +663,7 @@
     <footer>
         <div class="container text-center">
             <p class="mb-2 text-white-50">
-                &copy; {{ date('Y') }} <strong>Luxe Salon & Lounge</strong>. All rights reserved. Dubai, UAE.
+                &copy; {{ date('Y') }} <strong>{{ setting('salon_name', 'Luxe Salon & Lounge') }}</strong>. All rights reserved.
             </p>
             <small class="text-secondary">
                 Designed for excellence and bespoke hospitality.
